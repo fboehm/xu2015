@@ -1,0 +1,51 @@
+### C, when we're using squared exponential kernel
+calc_little_c <- function(mu1, mu2, theta){#mu1 a scalar and mu2 a scalar
+  return(exp(- (mu1 - mu2)^2 / theta^2))
+}
+###
+calc_little_q <- function(mu, tau){
+  return(dnorm(mu, mean = 0, sd = tau))
+}
+
+
+calc_C <- function(mu, theta, tau){# mu is a numeric vector; theta & tau are scalars
+  K <- length(mu)
+  C <- matrix(NA, nrow = K, ncol = K)
+  for (i in 1:K){
+    for (j in 1:K){
+      C[i,j]<- calc_little_q(mu[i], tau) * calc_little_c(mu[i], mu[j], theta) * calc_little_q(mu[j], tau)
+    }
+  }
+  return(C)
+}
+
+#' Update $\mu$ in Gibbs sampling
+#' 
+#' @param y data vector
+#' @param s vector of class assignments
+#' @param mu vector of class means
+#' @param sigma vector of class standard deviations
+#' @param tau hyperparameter
+update_mu <- function(y, s, mu, sigma, tau){
+  K <- length(mu)
+  for (k in 1:K){
+    eps <- rnorm(n=1, mean=0, sd=0.3) # reasonable sd?
+    foo <- prod(dnorm(y[s==k], mean=mu[k], sd = sigma[k]))
+    foo_prop <- prod(dnorm(y[s==k], mean= mu[k] + eps, sd = sigma[k]))
+    ## define C & Cprop
+    C <- calc_C(mu, theta, tau)
+    mu_prop[k] <- mu[k] + eps
+    C_prop <- calc_C(mu_prop, theta, tau)
+    b <- C[k, -k]
+    b_prop <- C_prop[k, -k]
+    bar <- C[k, k] - b %*% solve(C[-k, -k]) %*% t(b)
+    bar_prop <- C_prop[k, k] - b_prop %*% solve(C_prop[-k, -k]) %*% t(b_prop)
+    p_ratio <- foo_prop*bar_prop/(foo*bar)
+    u <- runif(n=1, min=0, max=1)
+    if ( u < p_ratio) {
+      mu[k]<- mu[k] + eps
+    }
+  }
+  return(mu)
+}
+
