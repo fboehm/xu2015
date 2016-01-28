@@ -1,5 +1,5 @@
 Package: xu2015
-Title: Gibbs sampling for posterior inference when using DPP prior
+Title: Gibbs sampling for posterior inference when using determinantal point process (DPP) prior
 Version: 0.0.0.9000
 Authors@R: person("Frederick", "Boehm", email = "frederick.boehm@gmail.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
