@@ -1,6 +1,6 @@
 
 #' Calculate the allocation probability
-#' 
+#'
 #' @param y data vector
 #' @param w a scalar weight
 #' @param mu a scalar class mean
@@ -14,9 +14,46 @@ calc_allocation_prob <- function(y, w, # w a scalar
 }
 
 
+#' Calculate rho, the acceptance probability for the update K step
+#'
+#' @param omega_small list containing the current state of parameter vector
+#' @param omega_big list containing the proposed state of parameter vector
+#' @export
+calc_rho <- function(y, omega_small, omega_big, a, b){
+  # omega_small (AND omega_big) consists of ONLY the relevant entry (ies) of each vector:
+  # mu, kappa, w;
+  # and the full vector of s
+  # and the integer K
+  # hence, each entry in omega is a 1-vector or a 2-vector when we
+  # work in one-dimension
+  ##########
+  # unpack omega
+  kappa_big <- omega_big$kappa
+  s_big <- omega_big$s
+  mu_big <- omega_big$mu
+  w_big <- omega_big$w
+  K_big <- omega_big$K
+  mu_big_full <- omega_big$mu_full
+  #unpack omega_prop
+  kappa_small <- omega_small$kappa
+  s_small <- omega_small$s
+  mu_small <- omega_small$mu
+  w_small <- omega_small$w
+  K_small <- omega_small$K
+  mu_small_full <- omega_small$mu_full
+  # calc kappa ratio
+  kappa_ratio <- (1 / gamma(a / 2)) * (kappa_big[1]) ^ (1 - a / 2) * kappa_big[2] * (b / (2 * kappa_big[2])) ^ (a / 2) * exp(- 0.5 * b * (1 / kappa_big[1] + 1 / kappa_big[2] - 1 / kappa_small)) / kappa[ind] ^ (1 - a / 2)
+  # calc w ratio
+  w_ratio <- w_big[1] ^ (delta - 1 + n_big[1]) * w_big[2] ^ (delta - 1 + n_big[2]) / (w_small ^ (delta - 1 + n_new[1] + n_new[2]) * beta(delta, K_small * delta))
+  # calc mu ratio
+  mu_ratio <- det(calc_C(mu_big_full)) / det(calc_C(mu_small_full))
+
+}
+
+
 
 #' Update $K$ in Gibbs sampling
-#' 
+#'
 #' @param mu vector of class means
 #' @param w vector of class weights
 #' @param kappa vector of inverse variances, one entry per class
@@ -55,8 +92,8 @@ update_K <- function(y, mu, w, kappa, tau, theta, s){
     kappa_new[K + 1] <- (1 - beta) * (1 - r) ^ 2 * (w[ind] / w_new[K + 1]) * kappa[ind]
     ### calculate ratios
     kappa_ratio <- (1 / gamma(a / 2)) * (kappa_new[ind]) ^ (1 - a / 2) * kappa_new[K + 1] * (b / (2 * kappa[K + 1])) ^ (a / 2) * exp(- 0.5 * b * (1 / kappa_new[ind] + 1 / kappa_new[K + 1] - 1 / kappa[ind])) / kappa[ind] ^ (1 - a / 2)
-    ## Yanxun told me to see Richardson & Green 1997 
-    # to get the method for 
+    ## Yanxun told me to see Richardson & Green 1997
+    # to get the method for
     # allocation, ie, to assign values to n_new
     s_new <- s
     foo <- rbinom(n = sum(s == ind), size = 1, prob = calc_allocation_prob(y[s == ind], w_new[ind], mu_new[ind], kappa_new[ind]) / (calc_allocation_prob(y[s == ind], w_new[ind], mu_new[ind], kappa_new[ind]) + calc_allocation_prob(y[s == ind], w_new[K + 1], mu_new[K + 1], kappa_new[K + 1])))
@@ -84,12 +121,12 @@ update_K <- function(y, mu, w, kappa, tau, theta, s){
     qKs <- 1/K
     qu <- dbeta(alpha, 1, 1) * dbeta(beta, 1, 1) * dbeta(r, 2, 2)
     detJ <- (w[ind]^(3+1)/ (w_new[ind] * w_new[K+1])^(3/2)) * (kappa[ind])^1.5 * (1-r^2)
-    ### 
+    ###
     acc_ratio <- posterior_ratio * q_Kplus1d * q_Kplus1c * detJ / ((K+1) * qKu * qKs * qu)
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
     if (u < acc_ratio) {out <- list(w_new, mu_new, kappa_new)} else {out <- list(w, mu, kappa)}
-  } 
+  }
   ##############################################
   ### COMBINE ##################################
   else { ## combine
@@ -108,14 +145,13 @@ update_K <- function(y, mu, w, kappa, tau, theta, s){
     kappa_new <- kappa
     kappa_new[ind1] <- (w[ind1]/w_new[ind1])*kappa[ind1] + (w[ind2]/w_new[ind1])*kappa[ind2] + (w[ind1]*w[ind2]/(w_new[ind1])^2)*(mu[ind1] - mu[ind2])^2
     kappa_new <- kappa_new[-ind2]
-    
-    
+
+
     # calculate acceptance ratio
-    
-    
-    
-    
-    acc_ratio 
+
+
+
+
   }
   return(list(K=K, kappa=kappa_new, mu = mu_new, w = w_new))
 }
