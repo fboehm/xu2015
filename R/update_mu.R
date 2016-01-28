@@ -8,6 +8,14 @@ calc_little_q <- function(mu, tau){
 }
 
 
+
+#' Calculate the C matrix for DPP
+#'
+#' @param mu
+#' @param theta
+#' @param tau
+#' @export
+
 calc_C <- function(mu, theta, tau){# mu is a numeric vector; theta & tau are scalars
   K <- length(mu)
   C <- matrix(NA, nrow = K, ncol = K)
@@ -20,7 +28,7 @@ calc_C <- function(mu, theta, tau){# mu is a numeric vector; theta & tau are sca
 }
 
 #' Update $\mu$ in Gibbs sampling
-#' 
+#'
 #' @param y data vector
 #' @param s vector of class assignments
 #' @param mu vector of class means

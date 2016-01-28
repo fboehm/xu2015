@@ -1,12 +1,12 @@
 #' Update sigma in Gibbs sampling
-#' 
+#'
 #' @param y data vector
 #' @param mu length-K vector of cluster means
 #' @param s vector of cluster assignments, same length as y
 #' @param a hyperparameter, a scalar
 #' @param b hyperparameter, a scalar
 #' @return updated sigma, a vector of cluster standard deviations
-#' @examples 
+#' @examples
 #' update_sigma(rnorm(6), mu = c(0, 1, 1), s = c(1,1,2,2,3,3), a = 1, b = 1)
 #' @export
 
