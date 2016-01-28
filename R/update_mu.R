@@ -34,7 +34,7 @@ calc_C <- function(mu, theta, tau){# mu is a numeric vector; theta & tau are sca
 #' @param mu vector of class means
 #' @param sigma vector of class standard deviations
 #' @param tau hyperparameter
-update_mu <- function(y, s, mu, sigma, tau){
+update_mu <- function(y, s, mu, sigma, tau, theta){
   K <- length(mu)
   for (k in 1:K){
     eps <- rnorm(n=1, mean=0, sd=0.3) # reasonable sd?

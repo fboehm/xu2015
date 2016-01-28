@@ -50,13 +50,13 @@ calc_rho <- function(y, omega_small, omega_big, ind, a, b, alpha, beta, r, delta
   posterior_ratio <- lik_ratio * kappa_ratio * w_ratio * mu_ratio
   #### define constants
   q_K_big_d <- 0.5
-  q_K_big_c <- 1/(K_big*(K_big-1))
-  qKu <- (K_small==1) + (K_small>1)/2
-  qKs <- 1/K_small
+  q_K_big_c <- 1 / (K_big * (K_big-1))
+  qKu <- (K_small == 1) + (K_small > 1) / 2
+  qKs <- 1 / K_small
   qu <- dbeta(alpha, 1, 1) * dbeta(beta, 1, 1) * dbeta(r, 2, 2)
-  detJ <- (w_small^(3+1)/ (w_big[1] * w_big[2]) ^ (3/2)) * kappa_small ^ 1.5 * (1 - r ^ 2)
+  detJ <- (w_small ^ (3 + 1) / (w_big[1] * w_big[2]) ^ (3 / 2)) * kappa_small ^ 1.5 * (1 - r ^ 2)
   ###
-  acc_ratio <- posterior_ratio * q_K_big_d * q_K_big_c * detJ / ( (K+1) * qKu * qKs * qu)
+  acc_ratio <- posterior_ratio * q_K_big_d * q_K_big_c * detJ / ( (K_big) * qKu * qKs * qu)
   return(acc_ratio)
 }
 
@@ -123,7 +123,7 @@ update_K <- function(y, mu, w, kappa, s, tau, theta, delta){
     # edit w
     w_new <- w
     w_new[ind1]<- w[ind1] + w[ind2]
-    w_new <- wnew[-ind2]
+    w_new <- w_new[-ind2]
     # edit mu
     mu_new <- mu
     mu_new[ind1] <- (w[ind1] * mu[ind1] + w[ind2] * mu[ind2])/w_new[ind1]

@@ -1,9 +1,9 @@
 #' Update tau in Gibbs sampling
-#' 
-#' 
+#'
+#'
 
 
-update_tau <- function(theta, tau, a2 = 0, b2 = 50){
+update_tau <- function(theta, tau, mu, a2 = 0, b2 = 50){
   a <- 1/(4*tau^2)
   b <- 1/(2*theta^2)
   tau_prop <- theta + rnorm(n=1, mean=0, sd = 0.5)
@@ -12,7 +12,7 @@ update_tau <- function(theta, tau, a2 = 0, b2 = 50){
   c_prop <- sqrt(a_prop^2 + 2*a_prop*b)
   # define the multiplier, mult
   mult <- b/(a + b + c)
-  mult_prop <- b_prop/(a_prop + b + c_prop)
+  mult_prop <- b/(a_prop + b + c_prop)
   exponent <- 0:19
   lambda <- sqrt(2*a / (a + b + c)) * mult^exponent # vector of eigvenvalues
   lambda_prop <- sqrt(2*a_prop / (a_prop + b + c_prop))*mult_prop^exponent # vector of 20 eigenvalues
@@ -25,7 +25,7 @@ update_tau <- function(theta, tau, a2 = 0, b2 = 50){
   u <- runif(n=1)
   if (u < acc_ratio) {
     out <- tau_prop
-  } 
+  }
   else {
     out <- tau
   }

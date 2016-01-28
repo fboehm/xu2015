@@ -1,7 +1,7 @@
 #' Update $theta$ in Gibbs sampling
 
 
-update_theta <- function(theta, tau, a1 = 0, b1 = 50){
+update_theta <- function(theta, tau, mu, a1 = 0, b1 = 50){
   a <- 1/(4*tau^2)
   b <- 1/(2*theta^2)
   theta_prop <- theta + rnorm(n=1, mean=0, sd = 0.5)
@@ -23,7 +23,7 @@ update_theta <- function(theta, tau, a1 = 0, b1 = 50){
   u <- runif(n=1)
   if (u < acc_ratio) {
     out <- theta_prop
-  } 
+  }
   else {
     out <- theta
   }
