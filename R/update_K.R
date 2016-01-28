@@ -57,7 +57,7 @@ calc_rho <- function(y, omega_small, omega_big, ind, a, b, alpha, beta, r, delta
   detJ <- (w_small^(3+1)/ (w_big[1] * w_big[2]) ^ (3/2)) * kappa_small ^ 1.5 * (1 - r ^ 2)
   ###
   acc_ratio <- posterior_ratio * q_K_big_d * q_K_big_c * detJ / ( (K+1) * qKu * qKs * qu)
-
+  return(acc_ratio)
 }
 
 
@@ -135,7 +135,7 @@ update_K <- function(y, mu, w, kappa, s, tau, theta, delta){
     # calculate acceptance ratio
     omega_small <- list(K = K - 1, mu = mu_new, kappa = kappa_new, w = w_new, s = s_new)
     omega_big <- list(K = K, mu = mu, kappa = kappa, w = w, s = s)
-    acc_ratio <- calc_rho(y, omega_small, omega_big, ind, a, b, alpha = , beta, r)
+    acc_ratio <- 1 / calc_rho(y, omega_small, omega_big, ind, a, b, alpha = , beta, r)
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
     if (u < acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s=s_new)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s)}
