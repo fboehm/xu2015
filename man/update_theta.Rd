@@ -4,7 +4,7 @@
 \alias{update_theta}
 \title{Update $theta$ in Gibbs sampling}
 \usage{
-update_theta(theta, tau, a1 = 0, b1 = 50)
+update_theta(theta, tau, mu, a1 = 0, b1 = 50)
 }
 \description{
 Update $theta$ in Gibbs sampling

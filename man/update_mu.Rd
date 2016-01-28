@@ -4,7 +4,7 @@
 \alias{update_mu}
 \title{Update $\mu$ in Gibbs sampling}
 \usage{
-update_mu(y, s, mu, sigma, tau)
+update_mu(y, s, mu, sigma, tau, theta)
 }
 \arguments{
 \item{y}{data vector}

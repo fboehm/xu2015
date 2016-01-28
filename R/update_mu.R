@@ -11,9 +11,9 @@ calc_little_q <- function(mu, tau){
 
 #' Calculate the C matrix for DPP
 #'
-#' @param mu
-#' @param theta
-#' @param tau
+#' @param mu vector of means
+#' @param theta hyperparameter
+#' @param tau hyperparameter
 #' @export
 
 calc_C <- function(mu, theta, tau){# mu is a numeric vector; theta & tau are scalars

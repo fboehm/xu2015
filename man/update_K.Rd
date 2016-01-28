@@ -4,7 +4,7 @@
 \alias{update_K}
 \title{Update $K$ in Gibbs sampling}
 \usage{
-update_K(mu, w, kappa)
+update_K(y, mu, w, kappa, s, tau, theta, delta)
 }
 \arguments{
 \item{mu}{vector of class means}
@@ -12,6 +12,10 @@ update_K(mu, w, kappa)
 \item{w}{vector of class weights}
 
 \item{kappa}{vector of inverse variances, one entry per class}
+
+\item{tau}{hyperparameter}
+
+\item{theta}{hyperparameter}
 }
 \description{
 Update $K$ in Gibbs sampling
