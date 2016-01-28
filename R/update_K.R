@@ -10,6 +10,7 @@ calc_allocation_prob <- function(y, w, # w a scalar
                                  mu, # mu a scalar
                                  kappa # scalar
 ){
+  stopifnot(length(w) == 1, length(mu) == 1, length(kappa) == 1, w <= 1, w >= 0)
   w * sqrt(kappa) * dnorm(y, mean = mu, sd = 1 / sqrt(kappa))
 }
 
@@ -18,7 +19,14 @@ calc_allocation_prob <- function(y, w, # w a scalar
 #'
 #' @param omega_small list containing the current state of parameter vector
 #' @param omega_big list containing the proposed state of parameter vector
-#'
+#' @param y data vector
+#' @param ind indicator denoting which cluster is affected
+#' @param a hyperparameter scalar
+#' @param b a scalar hyperparameter
+#' @param alpha scalar parameter for dimension-matching
+#' @param beta scalar parameter for dimension-matching
+#' @param r scalar parameter for dimension-matching
+#' @param delta scalar hyperparameter
 #' @export
 calc_rho <- function(y, omega_small, omega_big, ind, a, b, alpha, beta, r, delta){
   # work in one-dimension

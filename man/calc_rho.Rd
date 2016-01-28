@@ -7,9 +7,25 @@
 calc_rho(y, omega_small, omega_big, ind, a, b, alpha, beta, r, delta)
 }
 \arguments{
+\item{y}{data vector}
+
 \item{omega_small}{list containing the current state of parameter vector}
 
 \item{omega_big}{list containing the proposed state of parameter vector}
+
+\item{ind}{indicator denoting which cluster is affected}
+
+\item{a}{hyperparameter scalar}
+
+\item{b}{a scalar hyperparameter}
+
+\item{alpha}{scalar parameter for dimension-matching}
+
+\item{beta}{scalar parameter for dimension-matching}
+
+\item{r}{scalar parameter for dimension-matching}
+
+\item{delta}{scalar hyperparameter}
 }
 \description{
 Calculate rho, the acceptance probability for the update K step
