@@ -4,7 +4,7 @@
 \alias{calc_rho}
 \title{Calculate rho, the acceptance probability for the update K step}
 \usage{
-calc_rho(y, omega_small, omega_big, ind, a, b, alpha, beta, r, delta)
+calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r, delta)
 }
 \arguments{
 \item{y}{data vector}
@@ -13,7 +13,9 @@ calc_rho(y, omega_small, omega_big, ind, a, b, alpha, beta, r, delta)
 
 \item{omega_big}{list containing the proposed state of parameter vector}
 
-\item{ind}{indicator denoting which cluster is affected}
+\item{ind1}{indicator denoting which cluster is affected}
+
+\item{ind2}{indicator denoting other affected cluster}
 
 \item{a}{hyperparameter scalar}
 
