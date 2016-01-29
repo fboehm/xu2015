@@ -34,8 +34,10 @@ calc_C <- function(mu, theta, tau){# mu is a numeric vector; theta & tau are sca
 #' @param mu vector of class means
 #' @param sigma vector of class standard deviations
 #' @param tau hyperparameter
+#' @export
 update_mu <- function(y, s, mu, sigma, tau, theta){
   K <- length(mu)
+  mu_prop <- mu
   for (k in 1:K){
     eps <- rnorm(n=1, mean=0, sd=0.3) # reasonable sd?
     foo <- prod(dnorm(y[s==k], mean=mu[k], sd = sigma[k]))
@@ -46,8 +48,8 @@ update_mu <- function(y, s, mu, sigma, tau, theta){
     C_prop <- calc_C(mu_prop, theta, tau)
     b <- C[k, -k]
     b_prop <- C_prop[k, -k]
-    bar <- C[k, k] - b %*% solve(C[-k, -k]) %*% t(b)
-    bar_prop <- C_prop[k, k] - b_prop %*% solve(C_prop[-k, -k]) %*% t(b_prop)
+    bar <- C[k, k] - b %*% solve(C[-k, -k]) %*% b
+    bar_prop <- C_prop[k, k] - b_prop %*% solve(C_prop[-k, -k]) %*% b_prop
     p_ratio <- foo_prop*bar_prop/(foo*bar)
     u <- runif(n=1, min=0, max=1)
     if ( u < p_ratio) {

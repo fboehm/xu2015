@@ -92,7 +92,7 @@ update_K <- function(y, mu, w, kappa, s, tau, theta, delta){
   beta <- rbeta(n = 1, 1, 1)
   r <- rbeta(n = 1, 2, 2)
   ### decide to split or combine
-  split <- as.logical(rbinom(n = 1, prob = 1 - q_down))
+  split <- as.logical(rbinom(n = 1, size = 1, prob = 1 - q_down))
   if (split){
     omega_small <- list(K = K, mu = mu, kappa = kappa, w = w, s = s)
     ind <- sample(1:K, size = 1, replace = FALSE)

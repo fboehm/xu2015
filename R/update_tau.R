@@ -1,6 +1,6 @@
 #' Update tau in Gibbs sampling
 #'
-#'
+#' @export
 
 
 update_tau <- function(theta, tau, mu, a2 = 0, b2 = 50){

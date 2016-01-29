@@ -6,6 +6,17 @@
 \usage{
 update_theta(theta, tau, mu, a1 = 0, b1 = 50)
 }
+\arguments{
+\item{theta}{scalar}
+
+\item{tau}{scalar}
+
+\item{mu}{vector of means}
+
+\item{a1}{hyperparameter}
+
+\item{b1}{hyperparameter}
+}
 \description{
 Update $theta$ in Gibbs sampling
 }

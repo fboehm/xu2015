@@ -1,5 +1,10 @@
 #' Update $theta$ in Gibbs sampling
-
+#' @param theta scalar
+#' @param tau scalar
+#' @param mu vector of means
+#' @param a1 hyperparameter
+#' @param b1 hyperparameter
+#' @export
 
 update_theta <- function(theta, tau, mu, a1 = 0, b1 = 50){
   a <- 1/(4*tau^2)
