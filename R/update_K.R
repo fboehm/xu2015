@@ -43,7 +43,7 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
   w_small <- omega_small$w[ind1]
   K_small <- omega_small$K
   # calc kappa ratio
-  kappa_ratio <- (1 / gamma(a / 2)) * (kappa_big[1]) ^ (1 - a / 2) * kappa_big[2] * (b / (2 * kappa_big[2])) ^ (a / 2) * exp(- 0.5 * b * (1 / kappa_big[1] + 1 / kappa_big[2] - 1 / kappa_small)) / kappa[ind] ^ (1 - a / 2)
+  kappa_ratio <- (1 / gamma(a / 2)) * (kappa_big[1]) ^ (1 - a / 2) * kappa_big[2] * (b / (2 * kappa_big[2])) ^ (a / 2) * exp(- 0.5 * b * (1 / kappa_big[1] + 1 / kappa_big[2] - 1 / kappa_small)) / kappa[ind1] ^ (1 - a / 2)
   # calc w ratio
   n_big <- numeric(length = 2)
   n_big[1] <- sum(s_big == ind1)
@@ -149,7 +149,7 @@ update_K <- function(y, mu, w, kappa, s, tau, theta, delta){
     # calculate acceptance ratio
     omega_small <- list(K = K - 1, mu = mu_new, kappa = kappa_new, w = w_new, s = s_new)
     omega_big <- list(K = K, mu = mu, kappa = kappa, w = w, s = s)
-    acc_ratio <- 1 / calc_rho(y, omega_small, omega_big, ind, a, b, alpha = , beta, r)
+    acc_ratio <- 1 / calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r)
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
     if (u < acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s=s_new)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s)}
