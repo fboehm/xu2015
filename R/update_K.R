@@ -34,14 +34,16 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
   ##########
   # unpack omega
   K_big <- omega_big$K
-  kappa_big <- omega_big$kappa#[c(ind1, ind2)]
+  kappa_big <- omega_big$kappa[c(ind1, ind2)]
   s_big <- omega_big$s # use full vector, s
   w_big <- omega_big$w[c(ind1, ind2)]
+  mu_big <- omega_big$mu
   #unpack omega_prop
   kappa_small <- (omega_small$kappa)[ind1]
   s_small <- omega_small$s
   w_small <- (omega_small$w)[ind1]
   K_small <- omega_small$K
+  mu_small <- omega_small$mu
   # calc kappa ratio
   kappa_ratio <- (1 / gamma(a / 2)) * (kappa_big[1]) ^ (1 - a / 2) * kappa_big[2] * (b / (2 * kappa_big[2])) ^ (a / 2) * exp(- 0.5 * b * (1 / kappa_big[1] + 1 / kappa_big[2] - 1 / kappa_small)) / kappa_small ^ (1 - a / 2)
   # calc w ratio
@@ -52,8 +54,19 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
   # calc mu ratio
   mu_ratio <- det(calc_C(omega_big$mu, theta, tau)) / det(calc_C(omega_small$mu, theta, tau))
   # calc lik_ratio
-  log_lik_ratio <- sum(dnorm(y, mean = omega_big$mu[s_big], sd = sqrt(1/omega_big$kappa)[s_big], log = TRUE) - dnorm(y, mean = omega_small$mu[s_small], sd = sqrt(1/omega_small$kappa)[s_small], log=TRUE))
-  print(log_lik_ratio)
+  foo_big <- numeric(length=length(y))
+  sd_big <- sqrt(1/omega_big$kappa)
+  foo_small <- numeric(length = length(y))
+  sd_small <- sqrt(1/omega_small$kappa)
+  for (n in 1:length(y)){
+    foo_big[n] <- dnorm(y[n], mean = mu_big[s_big[n]], sd = sd_big[s_big[n]], log=TRUE)
+    foo_small[n] <- dnorm(y[n], mean = mu_small[s_small[n]], sd = sd_small[s_small[n]], log=TRUE)
+  }
+  stopifnot(sum(!is.na(foo_big))==length(y))
+  stopifnot(sum(!is.na(foo_small))==length(y))
+  log_lik_ratio <- sum(foo_big - foo_small, na.rm = FALSE) #
+  ############
+  print(c(log_lik_ratio, kappa_ratio, w_ratio, mu_ratio))
   # note that we are using the full vector $y$ when calculating log lik ratio
   # alternatively, we could use only those entries of y that have s corresponding to the component that's being split.
   lik_ratio <- exp(log_lik_ratio)
@@ -66,7 +79,6 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
   qu <- dbeta(alpha, 1, 1) * dbeta(beta, 1, 1) * dbeta(r, 2, 2)
   detJ <- (w_small ^ (3 + 1) / (w_big[1] * w_big[2]) ^ (3 / 2)) * kappa_small ^ 1.5 * (1 - r ^ 2)
   ###
-  #print(list(posterior_ratio, q_K_big_d, q_K_big_c, detJ, K_big, qKu, qKs, qu))
   acc_ratio <- posterior_ratio * q_K_big_d * q_K_big_c * detJ / ( (K_big) * qKu * qKs * qu)
   return(acc_ratio)
 }
@@ -150,11 +162,16 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     kappa_new[ind1] <- (w[ind1]/w_new[ind1])*kappa[ind1] + (w[ind2]/w_new[ind1])*kappa[ind2] + (w[ind1]*w[ind2]/(w_new[ind1])^2)*(mu[ind1] - mu[ind2])^2
     kappa_new <- kappa_new[-ind2]
     # edit s
-    s_new[ind1] <- s[ind1] + s[ind2]
+    ##### ERROR HERE
+    #s_new[ind1] <- s[ind1] + s[ind2]
+    ## PUT ind1 wherever there is ind2 in s_new
+    s_new[ind2]<- ind1
+    #################
     # calculate acceptance ratio
     omega_small <- list(K = K - 1, mu = mu_new, kappa = kappa_new, w = w_new, s = s_new)
     omega_big <- list(K = K, mu = mu, kappa = kappa, w = w, s = s)
-    acc_ratio <- 1 / calc_rho(y, omega_small = omega_small, omega_big = omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1)
+    bar <- calc_rho(y, omega_small = omega_small, omega_big = omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1)
+    acc_ratio <- 1 / bar
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
     if (u < acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s=s_new)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s)}
