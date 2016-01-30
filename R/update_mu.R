@@ -3,7 +3,7 @@
 #' @export
 
 calc_little_c <- function(mu1, mu2, theta){#mu1 a scalar and mu2 a scalar
-  stopifnot(theta > 0, length(theta) == 1, length(mu1) == 1, length(mu2) == 1)
+  stopifnot(length(theta) == 1, length(mu1) == 1, length(mu2) == 1)
   return(exp(- (mu1 - mu2)^2 / theta^2))
 }
 

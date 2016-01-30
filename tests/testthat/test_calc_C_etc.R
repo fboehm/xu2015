@@ -5,10 +5,6 @@ test_that("output length of calc_little_c is 1", {
   expect_equal(length(calc_little_c(rnorm(1), rnorm(1), theta = 1 )), 1)
 })
 
-test_that("negative theta input value gives error", {
-  expect_error(calc_little_c(rnorm(1), rnorm(1), theta = -1 ))
-})
-
 test_that("output of calc_little_c is non-negative", {
   expect_gte(calc_little_c(rnorm(1), rnorm(1), theta = 1), 0)
 })
