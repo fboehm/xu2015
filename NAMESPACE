@@ -2,6 +2,8 @@
 
 export(calc_C)
 export(calc_allocation_prob)
+export(calc_little_c)
+export(calc_little_q)
 export(calc_rho)
 export(update_K)
 export(update_mu)

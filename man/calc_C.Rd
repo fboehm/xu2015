@@ -9,9 +9,9 @@ calc_C(mu, theta, tau)
 \arguments{
 \item{mu}{vector of means}
 
-\item{theta}{hyperparameter}
+\item{theta}{hyperparameter, a scalar}
 
-\item{tau}{hyperparameter}
+\item{tau}{hyperparameter, a scalar}
 }
 \description{
 Calculate the C matrix for DPP

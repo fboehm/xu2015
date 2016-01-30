@@ -4,18 +4,22 @@
 \alias{update_K}
 \title{Update $K$ in Gibbs sampling}
 \usage{
-update_K(y, mu, w, kappa, s, tau, theta, delta)
+update_K(y, mu, w, sigma, s, tau, theta, delta)
 }
 \arguments{
+\item{y}{data vector}
+
 \item{mu}{vector of class means}
 
 \item{w}{vector of class weights}
 
-\item{kappa}{vector of inverse variances, one entry per class}
+\item{sigma}{vector of inverse variances, one entry per class}
 
 \item{tau}{hyperparameter}
 
 \item{theta}{hyperparameter}
+
+\item{delta}{hyperparameter}
 }
 \description{
 Update $K$ in Gibbs sampling

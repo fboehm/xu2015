@@ -50,8 +50,10 @@ update_mu <- function(y, s, mu, sigma, tau, theta){
   mu_prop <- mu
   for (k in 1:K){
     eps <- rnorm(n = 1, mean = 0, sd = 0.3) # reasonable sd?
-    foo <- prod(dnorm(y[s==k], mean = mu[k], sd = sigma[k]))
-    foo_prop <- prod(dnorm(y[s==k], mean = mu[k] + eps, sd = sigma[k]))
+    bar <- dnorm(y[s==k], mean = mu[k], sd = sigma[k], log = TRUE)
+    foo <- sum(bar)
+    bar_prop <- dnorm(y[s==k], mean = mu[k] + eps, sd = sigma[k], log = TRUE)
+    foo_prop <- sum(bar_prop)
     ## define C & Cprop
     C <- calc_C(mu, theta, tau)
     mu_prop[k] <- mu[k] + eps
@@ -60,7 +62,7 @@ update_mu <- function(y, s, mu, sigma, tau, theta){
     b_prop <- C_prop[k, -k]
     bar <- C[k, k] - b %*% solve(C[-k, -k]) %*% b
     bar_prop <- C_prop[k, k] - b_prop %*% solve(C_prop[-k, -k]) %*% b_prop
-    p_ratio <- foo_prop * bar_prop / (foo * bar)
+    p_ratio <- exp(foo_prop) * bar_prop / (exp(foo) * bar)
     u <- runif(n = 1, min = 0, max = 1)
     if ( u < p_ratio) {
       mu[k]<- mu[k] + eps
