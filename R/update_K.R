@@ -71,6 +71,7 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
   # alternatively, we could use only those entries of y that have s corresponding to the component that's being split.
   lik_ratio <- exp(log_lik_ratio)
   posterior_ratio <- lik_ratio * kappa_ratio * w_ratio * mu_ratio
+  print(posterior_ratio)
   #### define constants
   q_K_big_d <- 0.5
   q_K_big_c <- 1 / (K_big * (K_big-1))
