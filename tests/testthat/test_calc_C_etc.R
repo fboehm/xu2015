@@ -22,6 +22,6 @@ test_that("output of calc_little_q is non-negative", {
 context("calc_C")
 
 test_that("output is a square matrix", {
-  expect_equal(nrow(calc_C(rep(0,4), 1, 1)), ncol(calc_C(rep(0,4), 1, 1)))
+  expect_equal(nrow(calc_C(rep(0, 4), 1, 1)), ncol(calc_C(rep(0,4), 1, 1)))
   expect_equal(nrow(calc_C(0, 1, 1)), ncol(calc_C(0, 1, 1)))
 })

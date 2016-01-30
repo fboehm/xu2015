@@ -45,12 +45,13 @@ calc_C <- function(mu, theta, tau){# mu is a numeric vector; theta & tau are sca
 #' @param tau hyperparameter
 #' @export
 update_mu <- function(y, s, mu, sigma, tau, theta){
+  stopifnot(length(tau) == 1, length(theta) == 1, length(s) == length(s), length(mu) == length(sigma))
   K <- length(mu)
   mu_prop <- mu
   for (k in 1:K){
-    eps <- rnorm(n=1, mean=0, sd=0.3) # reasonable sd?
-    foo <- prod(dnorm(y[s==k], mean=mu[k], sd = sigma[k]))
-    foo_prop <- prod(dnorm(y[s==k], mean= mu[k] + eps, sd = sigma[k]))
+    eps <- rnorm(n = 1, mean = 0, sd = 0.3) # reasonable sd?
+    foo <- prod(dnorm(y[s==k], mean = mu[k], sd = sigma[k]))
+    foo_prop <- prod(dnorm(y[s==k], mean = mu[k] + eps, sd = sigma[k]))
     ## define C & Cprop
     C <- calc_C(mu, theta, tau)
     mu_prop[k] <- mu[k] + eps
@@ -59,8 +60,8 @@ update_mu <- function(y, s, mu, sigma, tau, theta){
     b_prop <- C_prop[k, -k]
     bar <- C[k, k] - b %*% solve(C[-k, -k]) %*% b
     bar_prop <- C_prop[k, k] - b_prop %*% solve(C_prop[-k, -k]) %*% b_prop
-    p_ratio <- foo_prop*bar_prop/(foo*bar)
-    u <- runif(n=1, min=0, max=1)
+    p_ratio <- foo_prop * bar_prop / (foo * bar)
+    u <- runif(n = 1, min = 0, max = 1)
     if ( u < p_ratio) {
       mu[k]<- mu[k] + eps
     }
