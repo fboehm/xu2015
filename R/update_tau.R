@@ -24,7 +24,7 @@ update_tau <- function(theta, tau, mu, a2 = 0, b2 = 50){
   det_ratio <- det(C_prop)/det(C)
   tau_acc_ratio <- prior_ratio * e_ratio * det_ratio
   u <- runif(n=1)
-  if (u < tau_sacc_ratio) {
+  if (u < tau_acc_ratio) {
     out <- tau_prop
   }
   else {
