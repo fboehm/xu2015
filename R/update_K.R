@@ -142,10 +142,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
     if (u < acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s = s_new)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s)}
-  }
-  ##############################################
-  ### COMBINE ##################################
-  else { ## combine
+  }else { ## combine
     indices <- sample(1:K, size=2, replace=FALSE)
     ind1 <- min(indices)
     ind2 <- max(indices)
@@ -165,7 +162,10 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     ##### ERROR HERE
     #s_new[ind1] <- s[ind1] + s[ind2]
     ## PUT ind1 wherever there is ind2 in s_new
-    s_new[ind2]<- ind1
+    s_new[s_new == ind2]<- ind1
+    for (k in 1:(K-2)){
+      s_new[s_new == (k+ind2)] <- k + ind2 - 1
+    }
     #################
     # calculate acceptance ratio
     omega_small <- list(K = K - 1, mu = mu_new, kappa = kappa_new, w = w_new, s = s_new)
