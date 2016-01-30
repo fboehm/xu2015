@@ -65,7 +65,7 @@ update_mu <- function(y, s, mu, sigma, tau, theta){
       bar <- C[k,k]
     if (length(mu_prop) > 1) {bar_prop <- C_prop[k, k] - b_prop %*% solve(C_prop[-k, -k]) %*% b_prop} else
       bar_prop <- C_prop[k,k]
-    p_ratio <- exp(foo_prop) * bar_prop / (exp(foo) * bar)
+    p_ratio <- exp(foo_prop - foo) * bar_prop / bar
     u <- runif(n = 1, min = 0, max = 1)
     if ( u < p_ratio) {
       mu[k]<- mu[k] + eps
