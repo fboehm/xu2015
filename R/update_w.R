@@ -8,7 +8,7 @@
 #'
 #' @export
 
-update_w <- function(delta, s){
+update_w <- function(delta = c(1,1,1), s){
   # delta is a K-vector
   K <- length(delta)
   n <- numeric(length = K)
@@ -16,6 +16,6 @@ update_w <- function(delta, s){
   for (k in 1:K){
     n[k] <- sum(s == k)
   }
-  out <- gtools::rdirichlet(n = 1, alpha = delta + n)
+  out <- as.numeric(gtools::rdirichlet(n = 1, alpha = delta + n))
   return(out)
 }
