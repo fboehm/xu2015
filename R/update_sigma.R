@@ -7,7 +7,7 @@
 #' @param tau hyperparameter, a scalar
 #' @return updated sigma, a vector of cluster standard deviations
 #' @examples
-#' update_sigma(rnorm(6), mu = c(0, 1, 1), s = c(1,1,2,2,3,3), a = 1, b = 1)
+#' update_sigma(rnorm(6), mu = c(0, 1, 1), s = c(1,1,2,2,3,3), theta = 1, tau = 1)
 #' @export
 
 

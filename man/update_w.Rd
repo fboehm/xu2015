@@ -4,7 +4,7 @@
 \alias{update_w}
 \title{Update w in Gibbs sampling}
 \usage{
-update_w(delta, s)
+update_w(delta = c(1, 1, 1), s)
 }
 \arguments{
 \item{delta}{a K-length vector of hyperparameters}
