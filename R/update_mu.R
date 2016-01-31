@@ -61,9 +61,9 @@ update_mu <- function(y, s, mu, sigma, tau, theta){
     b <- C[k, -k]
     b_prop <- C_prop[k, -k]
     # caution with a single mu
-    if (length(mu) > 1) {bar <- C[k, k] - b %*% solve(C[-k, -k]) %*% b} else
+    if (length(mu) > 1) {tryCatch(bar <- C[k, k] - b %*% solve(C[-k, -k]) %*% b, finally = print(C))} else
       bar <- as.numeric(C[k,k])
-    if (length(mu_prop) > 1) {bar_prop <- C_prop[k, k] - b_prop %*% solve(C_prop[-k, -k]) %*% b_prop} else
+    if (length(mu_prop) > 1) {tryCatch(bar_prop <- C_prop[k, k] - b_prop %*% solve(C_prop[-k, -k]) %*% b_prop, finally = print(C))} else
       bar_prop <- as.numeric(C_prop[k,k])
     p_ratio <- exp(foo_prop - foo) * bar_prop / bar
     u <- runif(n = 1, min = 0, max = 1)

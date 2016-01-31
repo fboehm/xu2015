@@ -4,7 +4,7 @@
 \alias{update_sigma}
 \title{Update sigma in Gibbs sampling}
 \usage{
-update_sigma(y, mu, s, a, b)
+update_sigma(y, mu, s, theta, tau)
 }
 \arguments{
 \item{y}{data vector}
@@ -13,9 +13,9 @@ update_sigma(y, mu, s, a, b)
 
 \item{s}{vector of cluster assignments, same length as y}
 
-\item{a}{hyperparameter, a scalar}
+\item{theta}{hyperparameter, a scalar}
 
-\item{b}{hyperparameter, a scalar}
+\item{tau}{hyperparameter, a scalar}
 }
 \value{
 updated sigma, a vector of cluster standard deviations
