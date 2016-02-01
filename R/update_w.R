@@ -8,9 +8,9 @@
 #'
 #' @export
 
-update_w <- function(delta = c(1,1,1), s){
+update_w <- function(mu, s, delta = 1){
   # delta is a K-vector
-  K <- length(delta)
+  K <- length(mu)
   n <- numeric(length = K)
   # n is a length-K vector
   for (k in 1:K){
