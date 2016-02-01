@@ -66,8 +66,7 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
   stopifnot(sum(!is.na(foo_small))==length(y))
   log_lik_ratio <- sum(foo_big - foo_small, na.rm = FALSE) #
   ############
-  print(c(log_lik_ratio, kappa_ratio, w_ratio, mu_ratio))
-  # note that we are using the full vector $y$ when calculating log lik ratio
+    # note that we are using the full vector $y$ when calculating log lik ratio
   # alternatively, we could use only those entries of y that have s corresponding to the component that's being split.
   lik_ratio <- exp(log_lik_ratio)
   posterior_ratio <- lik_ratio * kappa_ratio * w_ratio * mu_ratio
@@ -80,8 +79,9 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
   qu <- dbeta(alpha, 1, 1) * dbeta(beta, 1, 1) * dbeta(r, 2, 2)
   detJ <- (w_small ^ (3 + 1) / (w_big[1] * w_big[2]) ^ (3 / 2)) * kappa_small ^ 1.5 * (1 - r ^ 2)
   ###
+  ratios <- c(log_lik_ratio, kappa_ratio, w_ratio, mu_ratio, posterior_ratio)
   acc_ratio <- posterior_ratio * q_K_big_d * q_K_big_c * detJ / ( (K_big) * qKu * qKs * qu)
-  return(acc_ratio)
+  return(list(acc_ratio, ratios))
 }
 
 
@@ -142,7 +142,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     acc_ratio <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1)
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
-    if (u < acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s = s_new)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s)}
+    if (u < acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s = s_new, ar = acc_ratio, u = u)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = acc_ratio, u = u)}
   }else { ## combine
     indices <- sample(1:K, size=2, replace=FALSE)
     ind1 <- min(indices)
@@ -175,7 +175,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     acc_ratio <- 1 / bar
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
-    if (u < acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s=s_new)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s)}
+    if (u < acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s=s_new, ar = acc_ratio, u = u)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = acc_ratio, u = u)}
   }
   return(out)
 }
