@@ -33,35 +33,37 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
   ##########
   # unpack omega
   K_big <- omega_big$K
-  kappa_big <- omega_big$kappa[c(ind1, ind2)]
+  kappa_big <- omega_big$kappa
   s_big <- omega_big$s # use full vector, s
-  w_big <- omega_big$w[c(ind1, ind2)]
+  w_big <- omega_big$w
   mu_big <- omega_big$mu
-  #unpack omega_prop
-  kappa_small <- (omega_small$kappa)[ind1]
+  #unpack omega_small
+  kappa_small <- omega_small$kappa
   s_small <- omega_small$s
-  w_small <- (omega_small$w)[ind1]
+  w_small <- omega_small$w
   K_small <- omega_small$K
   mu_small <- omega_small$mu
   # calc kappa ratio
-  kappa_ratio <- (1 / gamma(a / 2)) * (kappa_big[1]) ^ (1 - a / 2) * kappa_big[2] * (b / (2 * kappa_big[2])) ^ (a / 2) * exp(- 0.5 * b * (1 / kappa_big[1] + 1 / kappa_big[2] - 1 / kappa_small)) / kappa_small ^ (1 - a / 2)
+  kappa_ratio <- (1 / gamma(a / 2)) * (kappa_big[ind1]) ^ (1 - a / 2) * kappa_big[ind2] * (b / (2 * kappa_big[ind2])) ^ (a / 2) * exp(- 0.5 * b * (1 / kappa_big[ind1] + 1 / kappa_big[ind2] - 1 / kappa_small[ind1])) / kappa_small[ind1] ^ (1 - a / 2)
   # calc w ratio
   n_big <- numeric(length = 2)
   n_big[1] <- sum(s_big == ind1)
-  n_big[2] <- sum(s_big == K_big)
-  w_ratio <- w_big[1] ^ (delta - 1 + n_big[1]) * w_big[2] ^ (delta - 1 + n_big[2]) / (w_small ^ (delta - 1 + n_big[1] + n_big[2]) * beta(delta, K_small * delta))
+  n_big[2] <- sum(s_big == ind2)
+  w_ratio <- w_big[ind1] ^ (delta - 1 + n_big[1]) * w_big[ind2] ^ (delta - 1 + n_big[2]) / (w_small[ind1] ^ (delta - 1 + n_big[1] + n_big[2]) * beta(delta, K_small[ind1] * delta))
   # calc mu ratio
   mu_ratio <- det(calc_C(omega_big$mu, theta, tau)) / det(calc_C(omega_small$mu, theta, tau))
   # calc lik_ratio
-  foo_big <- numeric(length=length(y))
   sd_big <- sqrt(1/omega_big$kappa)
-  foo_small <- numeric(length = length(y))
   sd_small <- sqrt(1/omega_small$kappa)
+  foo_diff <- numeric(length = length(y))
   for (n in 1:length(y)){
-    foo_big[n] <- dnorm(y[n], mean = mu_big[s_big[n]], sd = sd_big[s_big[n]], log=TRUE)
-    foo_small[n] <- dnorm(y[n], mean = mu_small[s_small[n]], sd = sd_small[s_small[n]], log=TRUE)
+# we're only interested in those entries that belong to the components/clusters of interest
+    if (s_big[n] %in% c(ind1, ind2)){
+      foo_diff[n] <- dnorm(y[n], mean = mu_big[s_big[n]], sd = sd_big[s_big[n]], log = TRUE) - dnorm(y[n], mean = mu_small[s_small[n]], sd = sd_small[s_small[n]], log = TRUE)
+    }
   }
-  log_lik_ratio <- sum(foo_big - foo_small, na.rm = FALSE) #
+  # log_lik_ratio <- sum(foo_big - foo_small, na.rm = FALSE) #
+  log_lik_ratio <- sum(foo_diff, na.rm = TRUE)
   ############
     # note that we are using the full vector $y$ when calculating log lik ratio
   # alternatively, we could use only those entries of y that have s corresponding to the component that's being split.
@@ -73,9 +75,9 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
   qKu <- (K_small == 1) + (K_small > 1) / 2
   qKs <- 1 / K_small
   qu <- dbeta(alpha, 1, 1) * dbeta(beta, 1, 1) * dbeta(r, 2, 2)
-  detJ <- (w_small ^ (3 + 1) / (w_big[1] * w_big[2]) ^ (3 / 2)) * kappa_small ^ 1.5 * (1 - r ^ 2)
+  detJ <- (w_small[ind1] ^ (3 + 1) / (w_big[ind1] * w_big[ind2]) ^ (3 / 2)) * kappa_small[ind1] ^ 1.5 * (1 - r ^ 2)
   ###
-  ratios <- c(log_lik_ratio, kappa_ratio, w_ratio, mu_ratio, posterior_ratio)
+  ratios <- c(lik_ratio, kappa_ratio, w_ratio, mu_ratio, posterior_ratio)
   acc_ratio <- posterior_ratio * q_K_big_d * q_K_big_c * detJ / ( (K_big) * qKu * qKs * qu)
   return(list(acc_ratio = acc_ratio, ratios = ratios))
 }
@@ -113,7 +115,9 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
   ##########
   if (split){
     omega_small <- list(K = K, mu = mu, kappa = kappa, w = w, s = s)
-    ind1 <- sample(1:K, size = 1, replace = FALSE)
+    sampling_vec <- as.integer(names(table(s)))
+    # we introduce sampling_vec because there's a chance that one or more clusters has no observations assigned to it.
+    ind1 <- sample(sampling_vec, size = 1, replace = FALSE)
     ind2 <- K + 1
     ## edit w; make K+1 the 'new' component
     w_new <- w
@@ -140,7 +144,9 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     # compare u to acceptance ratio & decide to accept or reject
     if (u < acc_ratio$acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s = s_new, ar = acc_ratio, u = u)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = acc_ratio, u = u)}
   }else { ## combine
-    indices <- sample(1:K, size=2, replace=FALSE)
+    sampling_vec <- as.integer(names(table(s)))
+    # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
+    indices <- sample(sampling_vec, size=2, replace=FALSE)
     ind1 <- min(indices)
     ind2 <- max(indices)
     # edit w
