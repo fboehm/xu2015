@@ -10,7 +10,6 @@ calc_allocation_prob <- function(y, w, # w a scalar
                                  mu, # mu a scalar
                                  kappa # scalar
 ){
-  stopifnot(length(w) == 1, length(mu) == 1, length(kappa) == 1, w <= 1, w >= 0)
   w * sqrt(kappa) * dnorm(y, mean = mu, sd = 1 / sqrt(kappa))
 }
 
@@ -29,7 +28,7 @@ calc_allocation_prob <- function(y, w, # w a scalar
 #' @param r scalar parameter for dimension-matching
 #' @param delta scalar hyperparameter
 #' @export
-calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r, delta){
+calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r, delta, theta, tau){
   # work in one-dimension
   ##########
   # unpack omega
@@ -136,7 +135,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     s_new[s == ind1] <- ind1 * foo + (ind2) * (1 - foo)
     ############
     omega_big <- list(K = K + 1, mu = mu_new, kappa = kappa_new, w = w_new, s = s_new)
-    acc_ratio <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1)
+    acc_ratio <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1, theta = theta, tau = tau)
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
     if (u < acc_ratio$acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s = s_new, ar = acc_ratio, u = u)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = acc_ratio, u = u)}
@@ -168,7 +167,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     # calculate acceptance ratio
     omega_small <- list(K = K - 1, mu = mu_new, kappa = kappa_new, w = w_new, s = s_new)
     omega_big <- list(K = K, mu = mu, kappa = kappa, w = w, s = s)
-    bar <- calc_rho(y, omega_small = omega_small, omega_big = omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1)
+    bar <- calc_rho(y, omega_small = omega_small, omega_big = omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1, theta = theta, tau = tau)
     acc_ratio <- 1 / bar$acc_ratio
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
