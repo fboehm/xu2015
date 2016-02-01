@@ -1,10 +1,10 @@
 #' Update w in Gibbs sampling
 #'
-#' @param delta a K-length vector of hyperparameters
+#' @param delta a scalar hyperparameter for dirichlet
 #' @param s a vector with one entry per observed data point of cluster assignments
 #' @return w a weight vector of length $K$
 #' @examples
-#' update_w(c(1,1,1), c(1,1,2,2,3,3))
+#' update_w(1:4, c(1,1,2,2,3,3))
 #'
 #' @export
 
