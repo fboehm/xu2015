@@ -62,8 +62,6 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
     foo_big[n] <- dnorm(y[n], mean = mu_big[s_big[n]], sd = sd_big[s_big[n]], log=TRUE)
     foo_small[n] <- dnorm(y[n], mean = mu_small[s_small[n]], sd = sd_small[s_small[n]], log=TRUE)
   }
-  stopifnot(sum(!is.na(foo_big))==length(y))
-  stopifnot(sum(!is.na(foo_small))==length(y))
   log_lik_ratio <- sum(foo_big - foo_small, na.rm = FALSE) #
   ############
     # note that we are using the full vector $y$ when calculating log lik ratio
