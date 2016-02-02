@@ -174,7 +174,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     omega_small <- list(K = length(mu) - 1, mu = mu_new, kappa = kappa_new, w = w_new, s = s_new)
     omega_big <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
     bar <- calc_rho(y, omega_small = omega_small, omega_big = omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1, theta = theta, tau = tau)
-    print(bar)
+    #print(bar)
     acc_ratio <- bar$acc_ratio
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
