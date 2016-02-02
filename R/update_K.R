@@ -1,7 +1,7 @@
 
 #' Calculate the allocation probability
 #'
-#' @param y data vector
+#' @param y scalar, ie, one element of data vector
 #' @param w a scalar weight
 #' @param mu a scalar class mean
 #' @param kappa a scalar inverse variance
@@ -45,11 +45,13 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
   mu_small <- omega_small$mu
   # calc kappa ratio
   kappa_ratio <- (1 / gamma(a / 2)) * (kappa_big[ind1]) ^ (1 - a / 2) * kappa_big[ind2] * (b / (2 * kappa_big[ind2])) ^ (a / 2) * exp(- 0.5 * b * (1 / kappa_big[ind1] + 1 / kappa_big[ind2] - 1 / kappa_small[ind1])) / kappa_small[ind1] ^ (1 - a / 2)
+  log_kappa_ratio <- - lgamma(a / 2) + (1 - a / 2) * log(kappa_big[ind1]) + log(kappa_big[ind2]) + (a / 2) * log(b / (2 * kappa_big[ind2])) - 0.5 * b * (1 / kappa_big[ind1] + 1 / kappa_big[ind2] - 1 / kappa_small[ind1]) - (1 - a / 2) * log(kappa_small[ind1])
   # calc w ratio
   n_big <- numeric(length = 2)
   n_big[1] <- sum(s_big == ind1)
   n_big[2] <- sum(s_big == ind2)
-  w_ratio <- w_big[ind1] ^ (delta - 1 + n_big[1]) * w_big[ind2] ^ (delta - 1 + n_big[2]) / (w_small[ind1] ^ (delta - 1 + n_big[1] + n_big[2]) * beta(delta, K_small[ind1] * delta))
+  w_ratio <- w_big[ind1] ^ (delta - 1 + n_big[1]) * w_big[ind2] ^ (delta - 1 + n_big[2]) / (w_small[ind1] ^ (delta - 1 + n_big[1] + n_big[2]) * beta(delta, K_small * delta))
+  log_w_ratio <- (delta - 1 + n_big[1]) * log(w_big[ind1]) + (delta - 1 + n_big[2]) * log(w_big[ind2]) - (delta - 1 + n_big[1] + n_big[2]) * log(w_small[ind1]) - lbeta(delta, K_small * delta) # note use of lbeta() function to return log of beta
   # calc mu ratio
   mu_ratio <- det(calc_C(omega_big$mu, theta, tau)) / det(calc_C(omega_small$mu, theta, tau))
   # calc lik_ratio
@@ -62,13 +64,9 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
       foo_diff[n] <- dnorm(y[n], mean = mu_big[s_big[n]], sd = sd_big[s_big[n]], log = TRUE) - dnorm(y[n], mean = mu_small[s_small[n]], sd = sd_small[s_small[n]], log = TRUE)
     }
   }
-  # log_lik_ratio <- sum(foo_big - foo_small, na.rm = FALSE) #
   log_lik_ratio <- sum(foo_diff, na.rm = TRUE)
   ############
-    # note that we are using the full vector $y$ when calculating log lik ratio
-  # alternatively, we could use only those entries of y that have s corresponding to the component that's being split.
-  lik_ratio <- exp(log_lik_ratio)
-  posterior_ratio <- lik_ratio * kappa_ratio * w_ratio * mu_ratio
+  log_posterior_ratio <- log_lik_ratio + log_kappa_ratio + log_w_ratio + log(mu_ratio)
   #### define constants
   q_K_big_d <- 0.5
   q_K_big_c <- 1 / (K_big * (K_big-1))
@@ -77,7 +75,8 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
   qu <- dbeta(alpha, 1, 1) * dbeta(beta, 1, 1) * dbeta(r, 2, 2)
   detJ <- (w_small[ind1] ^ (3 + 1) / (w_big[ind1] * w_big[ind2]) ^ (3 / 2)) * kappa_small[ind1] ^ 1.5 * (1 - r ^ 2)
   ###
-  ratios <- c(lik_ratio, kappa_ratio, w_ratio, mu_ratio, posterior_ratio)
+  ratios <- c(log_lik_ratio, log_kappa_ratio, log_w_ratio, log(mu_ratio), log_posterior_ratio)
+  posterior_ratio <- exp(log_posterior_ratio)
   acc_ratio <- posterior_ratio * q_K_big_d * q_K_big_c * detJ / ( (K_big) * qKu * qKs * qu)
   return(list(acc_ratio = acc_ratio, ratios = ratios))
 }
@@ -96,12 +95,10 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
 #' @export
 update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
   kappa <- 1/sigma^2
-  K <- length(mu)
-  sigma <- 1 / sqrt(kappa)
   a <- 1 / (4 * tau ^ 2)
   b <- 1 / (2 * theta ^ 2)
   q_down <- 0
-  if (K > 1){
+  if (length(mu) > 1){
     q_down <- 0.5
   }
   ### define extra parameters
@@ -114,11 +111,11 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
   split <- as.logical(rbinom(n = 1, size = 1, prob = 1 - q_down))
   ##########
   if (split){
-    omega_small <- list(K = K, mu = mu, kappa = kappa, w = w, s = s)
+    omega_small <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
     sampling_vec <- as.integer(names(table(s)))
     # we introduce sampling_vec because there's a chance that one or more clusters has no observations assigned to it.
     ind1 <- sample(sampling_vec, size = 1, replace = FALSE)
-    ind2 <- K + 1
+    ind2 <- length(mu) + 1
     ## edit w; make K+1 the 'new' component
     w_new <- w
     w_new[ind1] <- alpha * w[ind1]
@@ -128,21 +125,28 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     mu_new[ind1] <- mu[ind1] - sqrt(w_new[ind2] / w_new[ind1]) * r / sigma[ind1]
     mu_new[ind2] <- mu[ind1] + sqrt(w_new[ind1] / w_new[ind2]) * r / sigma[ind1]
     ## edit kappa (sigma)
-    kappa <- 1 / sigma ^ 2
     kappa_new <- kappa
     kappa_new[ind1] <- beta * (1 - r) ^ 2 * (w[ind1] / w_new[ind1]) * kappa[ind1]
     kappa_new[ind2] <- (1 - beta) * (1 - r) ^ 2 * (w[ind1] / w_new[ind2]) * kappa[ind1]
     ## Yanxun told me to see Richardson & Green 1997
     # to get the method for
     # allocation, ie, to assign values to n_new
-    foo <- rbinom(n = sum(s == ind1), size = 1, prob = calc_allocation_prob(y[s == ind1], w_new[ind1], mu_new[ind1], kappa_new[ind1]) / (calc_allocation_prob(y[s == ind1], w_new[ind1], mu_new[ind1], kappa_new[ind1]) + calc_allocation_prob(y[s == ind1], w_new[ind2], mu_new[ind2], kappa_new[ind2])))
-    s_new[s == ind1] <- ind1 * foo + (ind2) * (1 - foo)
+    for (i in 1:length(s)){
+      if (s[i] == ind1){
+        foo_p1 <- calc_allocation_prob(y = y[i], w = w_new[ind1], mu = mu_new[ind1], kappa = kappa_new[ind1])
+        foo_p2 <- calc_allocation_prob(y = y[i], w = w_new[ind2], mu = mu_new[ind2], kappa = kappa_new[ind2])
+        foo_bin <- rbinom(n = 1, size = 1, prob = foo_p1 / (foo_p1 + foo_p2))
+        s_new[i] <- foo_bin * ind1 + (1 - foo_bin) * ind2
+      }
+    }
+
     ############
-    omega_big <- list(K = K + 1, mu = mu_new, kappa = kappa_new, w = w_new, s = s_new)
-    acc_ratio <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1, theta = theta, tau = tau)
+    omega_big <- list(K = length(mu) + 1, mu = mu_new, kappa = kappa_new, w = w_new, s = s_new)
+    foo <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1, theta = theta, tau = tau)
+    print(foo)
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
-    if (u < acc_ratio$acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s = s_new, ar = acc_ratio, u = u)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = acc_ratio, u = u)}
+    if (u < foo$acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s = s_new, ar = foo, u = u)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u)}
   }else { ## combine
     sampling_vec <- as.integer(names(table(s)))
     # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
@@ -162,22 +166,21 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     kappa_new[ind1] <- (w[ind1]/w_new[ind1])*kappa[ind1] + (w[ind2]/w_new[ind1])*kappa[ind2] + (w[ind1]*w[ind2]/(w_new[ind1])^2)*(mu[ind1] - mu[ind2])^2
     kappa_new <- kappa_new[-ind2]
     # edit s
-    ##### ERROR HERE
-    #s_new[ind1] <- s[ind1] + s[ind2]
-    ## PUT ind1 wherever there is ind2 in s_new
     s_new[s_new == ind2]<- ind1
-    for (k in 1:(K-2)){
+    for (k in 1:(length(mu)-2)){
       s_new[s_new == (k+ind2)] <- k + ind2 - 1
     }
     #################
     # calculate acceptance ratio
-    omega_small <- list(K = K - 1, mu = mu_new, kappa = kappa_new, w = w_new, s = s_new)
-    omega_big <- list(K = K, mu = mu, kappa = kappa, w = w, s = s)
+    omega_small <- list(K = length(mu) - 1, mu = mu_new, kappa = kappa_new, w = w_new, s = s_new)
+    omega_big <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
     bar <- calc_rho(y, omega_small = omega_small, omega_big = omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1, theta = theta, tau = tau)
-    acc_ratio <- 1 / bar$acc_ratio
+    print(bar)
+    # acc_ratio <- 1 / bar$acc_ratio
+    acc_ratio <- bar$acc_ratio
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
-    if (u < acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s=s_new, ar = acc_ratio, u = u)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = acc_ratio, u = u)}
+    if (u < acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s=s_new, ar = bar, u = u)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = bar, u = u)}
   }
   return(out)
 }
