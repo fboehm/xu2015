@@ -111,7 +111,8 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
   ##########
   if (split){
     omega_small <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
-    sampling_vec <- as.integer(names(table(s)))
+    #sampling_vec <- as.integer(names(table(s)))
+    sampling_vec <- 1:length(mu)
     # we introduce sampling_vec because there's a chance that one or more clusters has no observations assigned to it.
     ind1 <- sample(sampling_vec, size = 1, replace = FALSE)
     ind2 <- length(mu) + 1
@@ -162,7 +163,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     mu_new <- mu_new[-ind2]
     # edit kappa
     kappa_new <- kappa
-    kappa_new[ind1] <- (w[ind1]/w_new[ind1])*kappa[ind1] + (w[ind2]/w_new[ind1])*kappa[ind2] + (w[ind1]*w[ind2]/(w_new[ind1])^2)*(mu[ind1] - mu[ind2])^2
+    kappa_new[ind1] <- (w[ind1] / w_new[ind1]) * kappa[ind1] + (w[ind2]/w_new[ind1])*kappa[ind2] + (w[ind1]*w[ind2]/(w_new[ind1])^2)*(mu[ind1] - mu[ind2])^2
     kappa_new <- kappa_new[-ind2]
     # edit s
     s_new[s_new == ind2]<- ind1
