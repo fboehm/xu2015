@@ -43,13 +43,13 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
   K_small <- omega_small$K
   mu_small <- omega_small$mu
   # calc kappa ratio
-  kappa_ratio <- (1 / gamma(a / 2)) * (kappa_big[ind1]) ^ (1 - a / 2) * kappa_big[ind2] * (b / (2 * kappa_big[ind2])) ^ (a / 2) * exp(- 0.5 * b * (1 / kappa_big[ind1] + 1 / kappa_big[ind2] - 1 / kappa_small[ind1])) / kappa_small[ind1] ^ (1 - a / 2)
+  #kappa_ratio <- (1 / gamma(a / 2)) * (kappa_big[ind1]) ^ (1 - a / 2) * kappa_big[ind2] * (b / (2 * kappa_big[ind2])) ^ (a / 2) * exp(- 0.5 * b * (1 / kappa_big[ind1] + 1 / kappa_big[ind2] - 1 / kappa_small[ind1])) / kappa_small[ind1] ^ (1 - a / 2)
   log_kappa_ratio <- - lgamma(a / 2) + (1 - a / 2) * log(kappa_big[ind1]) + log(kappa_big[ind2]) + (a / 2) * log(b / (2 * kappa_big[ind2])) - 0.5 * b * (1 / kappa_big[ind1] + 1 / kappa_big[ind2] - 1 / kappa_small[ind1]) - (1 - a / 2) * log(kappa_small[ind1])
   # calc w ratio
   n_big <- numeric(length = 2)
   n_big[1] <- sum(s_big == ind1)
   n_big[2] <- sum(s_big == ind2)
-  w_ratio <- w_big[ind1] ^ (delta - 1 + n_big[1]) * w_big[ind2] ^ (delta - 1 + n_big[2]) / (w_small[ind1] ^ (delta - 1 + n_big[1] + n_big[2]) * beta(delta, K_small * delta))
+  #w_ratio <- w_big[ind1] ^ (delta - 1 + n_big[1]) * w_big[ind2] ^ (delta - 1 + n_big[2]) / (w_small[ind1] ^ (delta - 1 + n_big[1] + n_big[2]) * beta(delta, K_small * delta))
   log_w_ratio <- (delta - 1 + n_big[1]) * log(w_big[ind1]) + (delta - 1 + n_big[2]) * log(w_big[ind2]) - (delta - 1 + n_big[1] + n_big[2]) * log(w_small[ind1]) - lbeta(delta, K_small * delta) # note use of lbeta() function to return log of beta
   # calc mu ratio
   mu_ratio <- det(calc_C(omega_big$mu, theta, tau)) / det(calc_C(omega_small$mu, theta, tau))
@@ -145,7 +145,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     print(foo)
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
-    if (u < foo$acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s = s_new, ar = foo, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
+    if (u < 1 / foo$acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s = s_new, ar = foo, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
   }else { ## combine
     sampling_vec <- as.integer(names(table(s)))
     # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
@@ -175,7 +175,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     omega_big <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
     bar <- calc_rho(y, omega_small = omega_small, omega_big = omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1, theta = theta, tau = tau)
     print(bar)
-    acc_ratio <- 1 / bar$acc_ratio
+    acc_ratio <- bar$acc_ratio
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
     if (u < acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s=s_new, ar = bar, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = bar, u = u, split = split)}
