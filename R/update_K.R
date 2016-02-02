@@ -1,4 +1,3 @@
-
 #' Calculate the allocation probability
 #'
 #' @param y scalar, ie, one element of data vector
