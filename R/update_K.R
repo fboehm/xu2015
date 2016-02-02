@@ -142,7 +142,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     ############
     omega_big <- list(K = length(mu) + 1, mu = mu_new, kappa = kappa_new, w = w_new, s = s_new)
     foo <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1, theta = theta, tau = tau)
-    print(foo)
+    #print(foo)
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
     if (u < 1 / foo$acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s = s_new, ar = foo, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
