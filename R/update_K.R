@@ -145,7 +145,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     print(foo)
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
-    if (u < foo$acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s = s_new, ar = foo, u = u)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u)}
+    if (u < foo$acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s = s_new, ar = foo, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
   }else { ## combine
     sampling_vec <- as.integer(names(table(s)))
     # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
@@ -178,7 +178,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     acc_ratio <- 1 / bar$acc_ratio
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
-    if (u < acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s=s_new, ar = bar, u = u)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = bar, u = u)}
+    if (u < acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s=s_new, ar = bar, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = bar, u = u, , split = split)}
   }
   return(out)
 }
