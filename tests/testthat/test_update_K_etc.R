@@ -38,3 +38,9 @@ test_that("all entries of output are positive", {
   expect_equal(define_big_w(w = 1:4 / 10, alpha = runif(n = 1, 0, 1), ind1 = 1, ind2 = 5) > 0 , rep(TRUE, 5))
   expect_equal(define_big_w(w = 1:10 / sum(1:10), alpha = runif(n = 1, 0, 1), ind1 = 1, ind2 = 11) > 0, rep(TRUE, 11))
 })
+###########################################################################
+context("define_big_mu helper for update_K")
+
+test_that("", {
+
+})

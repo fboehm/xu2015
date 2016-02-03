@@ -129,7 +129,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     foo <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, extras[1], extras[2], extras[3], delta = 1, theta = theta, tau = tau)
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
-    if (u <- foo$acc_ratio) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, ar = foo, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
+    if (u <- 1 / foo$acc_ratio) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, ar = foo, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
   }else { ## combine
     sampling_vec <- 1:length(mu)    # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
     indices <- sample(sampling_vec, size=2, replace=FALSE)
@@ -158,6 +158,9 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
 }
 
 ###########################################
+
+#' Define three parameters, alpha, beta and r for dimension-matching purposes in RJ MCMC
+#' @export
 define_extra_parameters <- function(){ # for dimension-matching purposes
   ### define extra parameters
   alpha <- rbeta(n = 1, 1, 1)
@@ -169,12 +172,18 @@ define_extra_parameters <- function(){ # for dimension-matching purposes
 
 ###########################################
 ## edit w; make K+1 the 'new' component
+#' Define a w weight vector that is one longer than the inputted weight vector
+#' @export
 define_big_w <- function(w, alpha, ind1, ind2 = length(w) + 1){
+  stopifnot(sum(w) == 1, print("sum of w is not 1"))
+  stopifnot(sum(w > 0) == length(w), print("not all entries of w are positive"))
   w[ind2] <- (1 - alpha) * w[ind1]
   w[ind1] <- alpha * w[ind1]
   return(w)
 }
 ###########################################
+#' Define a mu vector
+#' @export
 define_big_mu <- function(mu, w, sigma, ind1, ind2 = length(w) + 1, r){
   ## edit mu
   mu[ind2] <- mu[ind1] + sqrt(w[ind1] / w[ind2]) * r / sigma[ind1]
@@ -182,6 +191,9 @@ define_big_mu <- function(mu, w, sigma, ind1, ind2 = length(w) + 1, r){
   return(mu)
 }
 ###########################################
+
+#' Define a kappa vector
+#' @export
 define_big_kappa <- function(kappa, w, w_new, beta, r, ind1, ind2 = length(w) + 1){
   ## edit kappa (sigma)
   kappa[ind2] <- (1 - beta) * (1 - r) ^ 2 * (w[ind1] / w_new[ind2]) * kappa[ind1]
@@ -189,6 +201,9 @@ define_big_kappa <- function(kappa, w, w_new, beta, r, ind1, ind2 = length(w) + 
   return(kappa)
 }
 ###########################################
+
+#' Define a s vector for the model with a longer mu vector
+#' @export
 define_big_s <- function(s, ind1, ind2, y, w_new, mu_new, kappa_new){
   for (i in 1:length(s)){
     if (s[i] == ind1){
@@ -201,6 +216,9 @@ define_big_s <- function(s, ind1, ind2, y, w_new, mu_new, kappa_new){
   return(s)
 }
 ##########################################
+
+#' Define a smaller (by one) weight vector
+#' @export
 define_small_w <- function(w, ind1, ind2){
   # edit w
   w[ind1]<- w[ind1] + w[ind2]
@@ -208,6 +226,9 @@ define_small_w <- function(w, ind1, ind2){
   return(w)
 }
 ##########################################
+
+#' Define a small mu vector
+#' @export
 define_small_mu <- function(mu, w, w_new, ind1, ind2){
   # edit mu
   mu[ind1] <- (w[ind1] * mu[ind1] + w[ind2] * mu[ind2])/w_new[ind1]
@@ -215,12 +236,18 @@ define_small_mu <- function(mu, w, w_new, ind1, ind2){
   return(mu)
 }
 ##########################################
+
+#' Define a small kappa vector
+#' @export
 define_small_kappa <- function(kappa, w, w_new, ind1, ind2, mu){
   kappa[ind1] <- (w[ind1] / w_new[ind1]) * kappa[ind1] + (w[ind2]/w_new[ind1])*kappa[ind2] + (w[ind1]*w[ind2]/(w_new[ind1])^2)*(mu[ind1] - mu[ind2])^2
   kappa <- kappa[-ind2]
   return(kappa)
 }
 ##########################################
+
+#' Define a s vector for the smaller model, ie the model with shorter mu vector
+#' @export
 define_small_s <- function(s, mu, ind1, ind2){
   # edit s
   s[s == ind2]<- ind1
