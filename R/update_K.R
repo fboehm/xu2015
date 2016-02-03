@@ -93,88 +93,61 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
 #' @param delta hyperparameter
 #' @export
 update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
-  kappa <- 1/sigma^2
+  kappa <- 1 / sigma^2
   a <- 1 / (4 * tau ^ 2)
   b <- 1 / (2 * theta ^ 2)
   q_down <- 0
-  if (length(mu) > 1){
+  if (length(table(s)) > 1){
     q_down <- 0.5
   }
-  ### define extra parameters
-  alpha <- rbeta(n = 1, 1, 1)
-  beta <- rbeta(n = 1, 1, 1)
-  r <- rbeta(n = 1, 2, 2)
-  # define s_new
-  s_new <- s
+  # define extra parameters
+  extras <- define_extra_parameters()
   ### decide to split or combine
   split <- as.logical(rbinom(n = 1, size = 1, prob = 1 - q_down))
   ##########
   if (split){
-    omega_small <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
     #sampling_vec <- as.integer(names(table(s)))
     sampling_vec <- 1:length(mu)
     # we introduce sampling_vec because there's a chance that one or more clusters has no observations assigned to it.
     ind1 <- sample(sampling_vec, size = 1, replace = FALSE)
     ind2 <- length(mu) + 1
-    ## edit w; make K+1 the 'new' component
-    w_new <- w
-    w_new[ind1] <- alpha * w[ind1]
-    w_new[ind2] <- (1 - alpha) * w[ind1]
-    ## edit mu
-    mu_new <- mu
-    mu_new[ind1] <- mu[ind1] - sqrt(w_new[ind2] / w_new[ind1]) * r / sigma[ind1]
-    mu_new[ind2] <- mu[ind1] + sqrt(w_new[ind1] / w_new[ind2]) * r / sigma[ind1]
-    ## edit kappa (sigma)
-    kappa_new <- kappa
-    kappa_new[ind1] <- beta * (1 - r) ^ 2 * (w[ind1] / w_new[ind1]) * kappa[ind1]
-    kappa_new[ind2] <- (1 - beta) * (1 - r) ^ 2 * (w[ind1] / w_new[ind2]) * kappa[ind1]
     ## Yanxun told me to see Richardson & Green 1997
     # to get the method for
     # allocation, ie, to assign values to n_new
-    for (i in 1:length(s)){
-      if (s[i] == ind1){
-        foo_p1 <- calc_allocation_prob(y = y[i], w = w_new[ind1], mu = mu_new[ind1], kappa = kappa_new[ind1])
-        foo_p2 <- calc_allocation_prob(y = y[i], w = w_new[ind2], mu = mu_new[ind2], kappa = kappa_new[ind2])
-        foo_bin <- rbinom(n = 1, size = 1, prob = foo_p1 / (foo_p1 + foo_p2))
-        s_new[i] <- foo_bin * ind1 + (1 - foo_bin) * ind2
-      }
-    }
 
+    # define big w
+    w_big <- define_big_w(w = w, alpha = extras[1], ind1 = ind1, ind2 = ind2)
+    # define big mu
+    mu_big <- define_big_mu(mu = mu, w = w_big, sigma = sigma, ind1 = ind1, ind2 = ind2, r = extras[3])
+    # define sigma_big... actually, kappa_big
+    kappa_big <- define_big_kappa(kappa = kappa, w = w, w_new = w_big, beta = extras[2], r = extras[3], ind1 = ind1, ind2 = ind2)
+    # define s_big
+    s_big <- define_big_s(s = s, ind1 = ind1, ind2 = ind2, y = y, w_new = w_big, mu_new = mu_big, kappa_new = kappa_big)
     ############
-    omega_big <- list(K = length(mu) + 1, mu = mu_new, kappa = kappa_new, w = w_new, s = s_new)
+    omega_small <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
+    omega_big <- list(K = length(mu) + 1, mu = mu_big, kappa = kappa_big, w = w_big, s = s_big)
     foo <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1, theta = theta, tau = tau)
-    #print(foo)
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
     if (u <- foo$acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s = s_new, ar = foo, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
   }else { ## combine
-    sampling_vec <- as.integer(names(table(s)))
-    # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
+    sampling_vec <- 1:length(mu)    # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
     indices <- sample(sampling_vec, size=2, replace=FALSE)
     ind1 <- min(indices)
     ind2 <- max(indices)
-    # edit w
-    w_new <- w
-    w_new[ind1]<- w[ind1] + w[ind2]
-    w_new <- w_new[-ind2]
-    # edit mu
-    mu_new <- mu
-    mu_new[ind1] <- (w[ind1] * mu[ind1] + w[ind2] * mu[ind2])/w_new[ind1]
-    mu_new <- mu_new[-ind2]
-    # edit kappa
-    kappa_new <- kappa
-    kappa_new[ind1] <- (w[ind1] / w_new[ind1]) * kappa[ind1] + (w[ind2]/w_new[ind1])*kappa[ind2] + (w[ind1]*w[ind2]/(w_new[ind1])^2)*(mu[ind1] - mu[ind2])^2
-    kappa_new <- kappa_new[-ind2]
-    # edit s
-    s_new[s_new == ind2]<- ind1
-    for (k in 1:(length(mu)-2)){
-      s_new[s_new == (k+ind2)] <- k + ind2 - 1
-    }
+    # define small w
+    w_small <- define_small_w(w, ind1, ind2)
+    # define small mu
+    mu_small <- define_small_mu(mu = mu, w = w, w_new = w_small, ind1 = ind1, ind2 = ind2)
+    # define small kappa
+    kappa_small <- define_small_kappa(kappa, w, w_new = w_small, ind1, ind2, mu)
+    # define small s
+    s_small <- define_small_s(s, mu, ind1, ind2)
     #################
     # calculate acceptance ratio
-    omega_small <- list(K = length(mu) - 1, mu = mu_new, kappa = kappa_new, w = w_new, s = s_new)
+    omega_small <- list(K = length(mu) - 1, mu = mu_small, kappa = kappa_small, w = w_small, s = s_small)
     omega_big <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
-    bar <- calc_rho(y, omega_small = omega_small, omega_big = omega_big, ind1, ind2, a, b, alpha, beta, r, delta = 1, theta = theta, tau = tau)
+    bar <- calc_rho(y, omega_small = omega_small, omega_big = omega_big, ind1, ind2, a, b, alpha = 0, beta = 0, r = 0, delta = 1, theta = theta, tau = tau)
     #print(bar)
     acc_ratio <- bar$acc_ratio
     u <- runif(n = 1, min = 0, max = 1)
@@ -182,4 +155,77 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     if (u < acc_ratio) {out <- list(w = w_new, mu = mu_new, kappa = kappa_new, s=s_new, ar = bar, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = bar, u = u, split = split)}
   }
   return(out)
+}
+
+###########################################
+define_extra_parameters <- function(){ # for dimension-matching purposes
+  ### define extra parameters
+  alpha <- rbeta(n = 1, 1, 1)
+  beta <- rbeta(n = 1, 1, 1)
+  r <- rbeta(n = 1, 2, 2)
+  return(c(alpha, beta, r))
+}
+
+
+###########################################
+## edit w; make K+1 the 'new' component
+define_big_w <- function(w, alpha, ind1, ind2 = length(w) + 1){
+  w[ind1] <- alpha * w[ind1]
+  w[ind2] <- (1 - alpha) * w[ind1]
+  return(w)
+}
+###########################################
+define_big_mu <- function(mu, w, sigma, ind1, ind2 = length(w) + 1, r){
+  ## edit mu
+  mu[ind1] <- mu[ind1] - sqrt(w_new[ind2] / w_new[ind1]) * r / sigma[ind1]
+  mu[ind2] <- mu[ind1] + sqrt(w_new[ind1] / w_new[ind2]) * r / sigma[ind1]
+  return(mu)
+}
+###########################################
+define_big_kappa <- function(kappa, w, w_new, beta, r, ind1, ind2 = length(w) + 1){
+  ## edit kappa (sigma)
+  kappa[ind1] <- beta * (1 - r) ^ 2 * (w[ind1] / w_new[ind1]) * kappa[ind1]
+  kappa[ind2] <- (1 - beta) * (1 - r) ^ 2 * (w[ind1] / w_new[ind2]) * kappa[ind1]
+  return(kappa)
+}
+###########################################
+define_big_s <- function(s, ind1, ind2, y, w_new, mu_new, kappa_new){
+  for (i in 1:length(s)){
+    if (s[i] == ind1){
+      foo_p1 <- calc_allocation_prob(y = y[i], w = w_new[ind1], mu = mu_new[ind1], kappa = kappa_new[ind1])
+      foo_p2 <- calc_allocation_prob(y = y[i], w = w_new[ind2], mu = mu_new[ind2], kappa = kappa_new[ind2])
+      foo_bin <- rbinom(n = 1, size = 1, prob = foo_p1 / (foo_p1 + foo_p2))
+      s[i] <- foo_bin * ind1 + (1 - foo_bin) * ind2
+    }
+  }
+  return(s)
+}
+##########################################
+define_small_w <- function(w, ind1, ind2){
+  # edit w
+  w[ind1]<- w[ind1] + w[ind2]
+  w <- w[-ind2]
+  return(w)
+}
+##########################################
+define_small_mu <- function(mu, w, w_new, ind1, ind2){
+  # edit mu
+  mu[ind1] <- (w[ind1] * mu[ind1] + w[ind2] * mu[ind2])/w_new[ind1]
+  mu <- mu[-ind2]
+  return(mu)
+}
+##########################################
+define_small_kappa <- function(kappa, w, w_new, ind1, ind2, mu){
+  kappa[ind1] <- (w[ind1] / w_new[ind1]) * kappa[ind1] + (w[ind2]/w_new[ind1])*kappa[ind2] + (w[ind1]*w[ind2]/(w_new[ind1])^2)*(mu[ind1] - mu[ind2])^2
+  kappa <- kappa[-ind2]
+  return(kappa)
+}
+##########################################
+define_small_s <- function(s, mu, ind1, ind2){
+  # edit s
+  s[s == ind2]<- ind1
+  for (k in 1:(length(mu)-2)){
+    s[s == (k+ind2)] <- k + ind2 - 1
+  }
+  return(s)
 }
