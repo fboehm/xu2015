@@ -4,7 +4,8 @@
 \alias{calc_rho}
 \title{Calculate rho, the acceptance probability for the update K step}
 \usage{
-calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r, delta)
+calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r, delta,
+  theta, tau)
 }
 \arguments{
 \item{y}{data vector}

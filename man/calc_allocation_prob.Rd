@@ -7,7 +7,7 @@
 calc_allocation_prob(y, w, mu, kappa)
 }
 \arguments{
-\item{y}{data vector}
+\item{y}{scalar, ie, one element of data vector}
 
 \item{w}{a scalar weight}
 

@@ -4,12 +4,12 @@
 \alias{update_w}
 \title{Update w in Gibbs sampling}
 \usage{
-update_w(delta = c(1, 1, 1), s)
+update_w(mu, s, delta = 1)
 }
 \arguments{
-\item{delta}{a K-length vector of hyperparameters}
-
 \item{s}{a vector with one entry per observed data point of cluster assignments}
+
+\item{delta}{a scalar hyperparameter for dirichlet}
 }
 \value{
 w a weight vector of length $K$
@@ -18,7 +18,7 @@ w a weight vector of length $K$
 Update w in Gibbs sampling
 }
 \examples{
-update_w(c(1,1,1), c(1,1,2,2,3,3))
+update_w(1:4, c(1,1,2,2,3,3))
 
 }
 
