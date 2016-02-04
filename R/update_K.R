@@ -71,7 +71,7 @@ calc_rho <- function(y, omega_small, omega_big, ind1, ind2, a, b, alpha, beta, r
   q_K_big_c <- 1 / (K_big * (K_big-1))
   qKu <- (K_small == 1) + (K_small > 1) / 2
   qKs <- 1 / K_small
-  qu <- dbeta(extras[1], 1, 1) * dbeta(extras[2], 1, 1) * dbeta(extras[3], 2, 2)
+  qu <- dbeta(alpha, 1, 1) * dbeta(beta, 1, 1) * dbeta(r, 2, 2)
   detJ <- (w_small[ind1] ^ (3 + 1) / (w_big[ind1] * w_big[ind2]) ^ (3 / 2)) * kappa_small[ind1] ^ 1.5 * (1 - r ^ 2)
   ###
   ratios <- c(log_lik_ratio, log_kappa_ratio, log_w_ratio, log(mu_ratio), log_posterior_ratio)
@@ -129,7 +129,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     foo <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, extras[1], extras[2], extras[3], delta = 1, theta = theta, tau = tau)
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
-    if (u <- 1 / foo$acc_ratio) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, ar = foo, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
+    if (u < 1 / foo$acc_ratio) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, ar = foo, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
   }else { ## combine
     sampling_vec <- 1:length(mu)    # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
     indices <- sample(sampling_vec, size=2, replace=FALSE)
@@ -175,8 +175,8 @@ define_extra_parameters <- function(){ # for dimension-matching purposes
 #' Define a w weight vector that is one longer than the inputted weight vector
 #' @export
 define_big_w <- function(w, alpha, ind1, ind2 = length(w) + 1){
-  stopifnot(sum(w) == 1)
-  stopifnot(sum(w > 0) == length(w))
+  #stopifnot(sum(w) == 1)
+  #stopifnot(sum(w > 0) == length(w))
   w[ind2] <- (1 - alpha) * w[ind1]
   w[ind1] <- alpha * w[ind1]
   return(w)
