@@ -136,7 +136,6 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     min_index <- min(indices)
     max_index <- max(indices)
     good_new_mu <- min_index + 1 == max_index
-    print(paste("good_new_mu has value:", good_new_mu))
     # in the above, good_new_mu is a logical with value TRUE if
     # the value of the new mu component is viable for acceptance
     # and FALSE otherwise
@@ -153,7 +152,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     sampling_vec <- 1:(length(mu) - 1)    # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
     index <- sample(sampling_vec, size=1, replace=FALSE)
     ind1 <- index
-    ind2 <- index + 1
+    ind2 <- index + 1 # force the second index to be next to the first
     # define small w
     w_small <- define_small_w(w, ind1, ind2)
     # define small mu
@@ -174,8 +173,6 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     if (u < acc_ratio) {out <- list(w = w_small, mu = mu_small, kappa = kappa_small, s=s_small, ar = bar, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = bar, u = u, split = split)}
   }
   return(out)
-  print(paste("split has value:", split))
-  print(paste("mu has value:", foo$mu))
 }
 
 ###########################################
