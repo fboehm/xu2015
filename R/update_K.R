@@ -175,8 +175,8 @@ define_extra_parameters <- function(){ # for dimension-matching purposes
 #' Define a w weight vector that is one longer than the inputted weight vector
 #' @export
 define_big_w <- function(w, alpha, ind1, ind2 = length(w) + 1){
-  stopifnot(sum(w) == 1, print("sum of w is not 1"))
-  stopifnot(sum(w > 0) == length(w), print("not all entries of w are positive"))
+  stopifnot(sum(w) == 1)
+  stopifnot(sum(w > 0) == length(w))
   w[ind2] <- (1 - alpha) * w[ind1]
   w[ind1] <- alpha * w[ind1]
   return(w)
