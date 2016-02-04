@@ -123,18 +123,30 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     kappa_big <- define_big_kappa(kappa = kappa, w = w, w_new = w_big, beta = extras[2], r = extras[3], ind1 = ind1, ind2 = ind2)
     # define s_big
     s_big <- define_big_s(s = s, ind1 = ind1, ind2 = ind2, y = y, w_new = w_big, mu_new = mu_big, kappa_new = kappa_big)
+    ##### order parameter vectors by values of mu_big
+    out <- order_parameter_vector(mu = mu_big, sigma = sigma_big, w = w_big, s = s_big)
+    # unpack out
+    s_big <- out$s
+    w_big <- out$w
+    mu_big <- out$mu
+    sigma_big <- out$sigma
+    ## Check that the 'new' component of mu is where it should be
+    good_new_mu <- mu[-(1:(ind1))] == mu_big[-(1:(ind1 + 1))]
+    # in the above, good_new_mu is a logical with value TRUE if
+    # the value of the new mu component is viable for acceptance
+    # and FALSE otherwise
     ############
     omega_small <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
     omega_big <- list(K = length(mu) + 1, mu = mu_big, kappa = kappa_big, w = w_big, s = s_big)
     foo <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, extras[1], extras[2], extras[3], delta = 1, theta = theta, tau = tau)
     u <- runif(n = 1, min = 0, max = 1)
-    # compare u to acceptance ratio & decide to accept or reject
-    if (u < 1 / foo$acc_ratio) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, ar = foo, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
+    # 1. compare u to acceptance ratio & 2. check if good_new_mu is TRUE, then decide to accept or reject
+    if (u < 1 / foo$acc_ratio & good_new_mu) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, ar = foo, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
   }else { ## combine
-    sampling_vec <- 1:length(mu)    # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
-    indices <- sample(sampling_vec, size=2, replace=FALSE)
-    ind1 <- min(indices)
-    ind2 <- max(indices)
+    sampling_vec <- 1:(length(mu) - 1)    # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
+    index <- sample(sampling_vec, size=1, replace=FALSE)
+    ind1 <- index
+    ind2 <- index + 1
     # define small w
     w_small <- define_small_w(w, ind1, ind2)
     # define small mu
