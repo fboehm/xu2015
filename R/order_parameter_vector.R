@@ -3,10 +3,10 @@
 #' @param mu a mean vector
 #' @param sigma a standard deviation vector
 #' @param w a weight vector
-#' @param s
+#' @param s an allocation vector
 #'
 #' @export
-order_parameter_vector <- function(mu, sigma, w){
+order_parameter_vector <- function(mu, sigma, w, s){
   # get order
   ord <- order(mu)
   # re-assign labels to s vector
