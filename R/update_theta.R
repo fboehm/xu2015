@@ -27,7 +27,7 @@ update_theta <- function(theta, tau, mu, a1 = 0, b1 = 50, exponent = 0:199){
   C_prop <- calc_C(mu, theta_prop, tau)
   det_ratio <- det(C_prop) / det(C)
   acc_ratio <- prior_ratio * e_ratio * det_ratio
-  u <- runif(n=1)
+  u <- runif(n = 1)
   if (u < acc_ratio) {
     out <- theta_prop
   }
