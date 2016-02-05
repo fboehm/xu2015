@@ -12,7 +12,7 @@ order_parameter_vector <- function(mu, sigma, w, s){
   # re-assign labels to s vector
   s_new <- s
   for (i in 1:length(mu)){
-    s_new[s == i] <- ord[i]
+    s_new[s == i] <- which(ord == i)
   }
   return(list(mu = mu[ord], sigma = sigma[ord], w = w[ord], s = s_new))
 }
