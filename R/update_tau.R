@@ -6,7 +6,8 @@
 update_tau <- function(theta, tau, mu, a2 = 0, b2 = 50){
   a <- 1/(4*tau^2)
   b <- 1/(2*theta^2)
-  tau_prop <- abs(theta + rnorm(n=1, mean=0, sd = 0.5))
+  tau_prop <- theta + rnorm(n=1, mean=0, sd = 0.1)
+  #tau_prop <- abs(theta + rnorm(n=1, mean=0, sd = 0.5))
   # note use of absolute value above to ensure that tau_prop is positive
   a_prop <- 1/(4*tau_prop^2)
   c <- sqrt(a^2 + 2*a*b)
