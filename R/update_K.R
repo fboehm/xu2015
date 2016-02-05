@@ -133,6 +133,9 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     sigma_big <- out$sigma
     ## Check that the 'new' component of mu is where it should be in the ordered mu
     which(!(mu_big %in% mu)) -> indices
+    if (sum(is.na(indices)) > 0) stop("Missing values in vector 'indices'")
+    print(paste("mu: ", mu))
+    print(paste("mu_big:", mu_big))
     min_index <- min(indices)
     max_index <- max(indices)
     good_new_mu <- min_index + 1 == max_index
