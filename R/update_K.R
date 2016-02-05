@@ -131,9 +131,11 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     w_big <- out$w
     mu_big <- out$mu
     sigma_big <- out$sigma
-    ## Check that the 'new' component of mu is where it should be
-    good_new_mu <- isTRUE(all.equal(mu[-ind1], mu_big[-c(ind1,ind1 + 1)]))
-    print(good_new_mu)
+    ## Check that the 'new' component of mu is where it should be in the ordered mu
+    which(!(mu_big %in% mu)) -> indices
+    min_index <- min(indices)
+    max_index <- max(indices)
+    good_new_mu <- min_index + 1 == max_index
     # in the above, good_new_mu is a logical with value TRUE if
     # the value of the new mu component is viable for acceptance
     # and FALSE otherwise
@@ -143,14 +145,14 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     foo <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, extras[1], extras[2], extras[3], delta = 1, theta = theta, tau = tau)
     u <- runif(n = 1, min = 0, max = 1)
     # 1. compare u to acceptance ratio & 2. check if good_new_mu is TRUE, then decide to accept or reject
-    if (good_new_mu & u < 1 / foo$acc_ratio) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, ar = foo, u = u, split = split)}
+    if (good_new_mu & u < foo$acc_ratio) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, ar = foo, u = u, split = split)}
       else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
 
   }else { ## combine
     sampling_vec <- 1:(length(mu) - 1)    # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
     index <- sample(sampling_vec, size=1, replace=FALSE)
     ind1 <- index
-    ind2 <- index + 1
+    ind2 <- index + 1 # force the second index to be next to the first
     # define small w
     w_small <- define_small_w(w, ind1, ind2)
     # define small mu
@@ -165,7 +167,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     omega_big <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
     bar <- calc_rho(y, omega_small = omega_small, omega_big = omega_big, ind1, ind2, a, b, extras[1], extras[2], extras[3], delta = 1, theta = theta, tau = tau)
     #print(bar)
-    acc_ratio <- bar$acc_ratio
+    acc_ratio <- 1 / bar$acc_ratio
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
     if (u < acc_ratio) {out <- list(w = w_small, mu = mu_small, kappa = kappa_small, s=s_small, ar = bar, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = bar, u = u, split = split)}
