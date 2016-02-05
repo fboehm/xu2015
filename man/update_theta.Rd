@@ -4,7 +4,7 @@
 \alias{update_theta}
 \title{Update $theta$ in Gibbs sampling}
 \usage{
-update_theta(theta, tau, mu, a1 = 0, b1 = 50)
+update_theta(theta, tau, mu, a1 = 0, b1 = 50, exponent = 0:199)
 }
 \arguments{
 \item{theta}{scalar}
@@ -13,9 +13,9 @@ update_theta(theta, tau, mu, a1 = 0, b1 = 50)
 
 \item{mu}{vector of means}
 
-\item{a1}{hyperparameter}
+\item{a1}{hyperparameter, prior mean for theta}
 
-\item{b1}{hyperparameter}
+\item{b1}{hyperparameter, prior sd for theta}
 }
 \description{
 Update $theta$ in Gibbs sampling

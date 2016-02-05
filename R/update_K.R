@@ -135,7 +135,8 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     which(!(mu_big %in% mu)) -> indices
     min_index <- min(indices)
     max_index <- max(indices)
-    good_new_mu <- min_index + 1 == max_index
+    if (length(mu) > 1) {good_new_mu <- min_index + 1 == max_index}
+      else {good_new_mu <- TRUE}
     # in the above, good_new_mu is a logical with value TRUE if
     # the value of the new mu component is viable for acceptance
     # and FALSE otherwise

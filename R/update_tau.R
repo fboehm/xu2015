@@ -3,13 +3,13 @@
 #' @export
 
 
-update_tau <- function(theta, tau, mu, a2 = 0, b2 = 50, exponent = 0:199){
+update_tau <- function(tau, theta, mu, a2 = 0, b2 = 50, exponent = 0:199){
   aa <- 1 / (4 * tau ^ 2)
   bb <- 1 / (2 * theta ^ 2)
   tau_prop <- tau + rnorm(n = 1, mean = 0, sd = 0.1)
   #tau_prop <- abs(theta + rnorm(n=1, mean=0, sd = 0.5))
   # note use of absolute value above to ensure that tau_prop is positive
-  a_prop <- 1/(4 * tau_prop ^ 2)
+  aa_prop <- 1/(4 * tau_prop ^ 2)
   cc <- sqrt(aa ^ 2 + 2 * aa * bb)
   cc_prop <- sqrt(aa_prop ^ 2 + 2 * aa_prop * bb)
   # define the multiplier, mult
