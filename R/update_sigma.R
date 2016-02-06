@@ -12,15 +12,15 @@
 
 
 update_sigma <- function(y, mu, s, theta, tau){
-  a <- 1/(4*tau^2)
-  b <- 1/(2*theta^2)
+  a <- 1 / (4 * tau ^ 2)
+  b <- 1 / (2 * theta ^ 2)
   K <- length(mu)
   n <- numeric(length=K)
   S <- numeric(length=K)
   for (k in 1:K){
     n[k] <- sum(s == k)
-    S[k] <- sum((s==k)*(y - mu[k])^2)
+    S[k] <- sum((s==k) * (y - mu[k]) ^ 2)
   }
-  sigmasq_inverse <- rgamma(n = K, shape = (a + n)/2, rate = (b + S)/2)
-  return(sqrt(1/sigmasq_inverse))
+  sigmasq_inverse <- rgamma(n = K, shape = (a + n) / 2, rate = (b + S) / 2)
+  return(sqrt(1 / sigmasq_inverse))
 }

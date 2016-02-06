@@ -12,7 +12,7 @@ calc_little_c <- function(mu1, mu2, theta){#mu1 a scalar and mu2 a scalar
 #' @export
 calc_little_q <- function(mu, tau){
   #stopifnot(tau > 0, length(tau) == 1)
-  return(dnorm(mu, mean = 0, sd = tau))
+  return(dnorm(mu, mean = 0, sd = abs(tau)))
 }
 
 
@@ -36,7 +36,7 @@ calc_C <- function(mu, theta, tau){# mu is a numeric vector; theta & tau are sca
   return(C)
 }
 
-#' Update $\mu$ in Gibbs sampling
+#' Update $mu$ in Gibbs sampling
 #'
 #' @param y data vector
 #' @param s vector of class assignments
@@ -45,7 +45,7 @@ calc_C <- function(mu, theta, tau){# mu is a numeric vector; theta & tau are sca
 #' @param tau hyperparameter
 #' @export
 update_mu <- function(y, s, mu, sigma, tau, theta){
-  stopifnot(length(tau) == 1, length(theta) == 1, length(s) == length(s), length(mu) == length(sigma))
+  stopifnot(length(tau) == 1, length(theta) == 1, length(mu) == length(sigma))
   K <- length(mu)
   mu_prop <- mu
   for (k in 1:K){
