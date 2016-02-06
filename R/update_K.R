@@ -96,19 +96,17 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
   kappa <- 1 / sigma^2
   a <- 1 / (4 * tau ^ 2)
   b <- 1 / (2 * theta ^ 2)
-  q_down <- 0
-  if (length(table(s)) > 1){
-    q_down <- 0.5
+  q_combine <- 0
+  if (length(mu) > 1){
+    q_combine <- 0.5
   }
   # define extra parameters
   extras <- define_extra_parameters()
   ### decide to split or combine
-  split <- as.logical(rbinom(n = 1, size = 1, prob = 1 - q_down))
+  split <- as.logical(rbinom(n = 1, size = 1, prob = 1 - q_combine))
   ##########
   if (split){
-    #sampling_vec <- as.integer(names(table(s)))
     sampling_vec <- 1:(length(mu))
-    # we introduce sampling_vec because there's a chance that one or more clusters has no observations assigned to it.
     ind1 <- sample(sampling_vec, size = 1, replace = FALSE)
     ind2 <- length(mu) + 1
     ## Yanxun told me to see Richardson & Green 1997
