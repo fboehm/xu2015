@@ -132,6 +132,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     mu_big <- out$mu
     sigma_big <- out$sigma
     ## Check that the 'new' component of mu is where it should be in the ordered mu
+    if (length(mu) + 1 != length(mu_big))stop("lengths of mu and mu_big are wrong")
     which(!(mu_big %in% mu)) -> indices
     if (sum(is.na(indices)) > 0) stop("Missing values in vector 'indices'")
     print(paste("mu: ", mu))

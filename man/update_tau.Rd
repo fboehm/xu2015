@@ -4,7 +4,7 @@
 \alias{update_tau}
 \title{Update tau in Gibbs sampling}
 \usage{
-update_tau(theta, tau, mu, a2 = 0, b2 = 50, exponent = 0:199)
+update_tau(tau, theta, mu, a2 = 0, b2 = 50, exponent = 0:199)
 }
 \description{
 Update tau in Gibbs sampling
