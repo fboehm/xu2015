@@ -134,9 +134,9 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     if (length(mu_other) > 0) {
       tmp1 <- mu_other > min_mu
       tmp2 <- mu_other < max_mu
-      print(tmp1)
-      print(tmp2)
-      print(tmp1 & tmp2)
+      #print(tmp1)
+      #print(tmp2)
+      #print(tmp1 & tmp2)
       if (isTRUE(all.equal((tmp1 & tmp2), rep(FALSE, length(mu_other))))){
         good_new_mu <- TRUE
         } else {good_new_mu <- FALSE}
@@ -150,7 +150,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     foo <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, extras[1], extras[2], extras[3], delta = 1, theta = theta, tau = tau)
     u <- runif(n = 1, min = 0, max = 1)
     # 1. compare u to acceptance ratio & 2. check if good_new_mu is TRUE, then decide to accept or reject
-    print(c(good_new_mu, foo$acc_ratio))
+    #print(c(good_new_mu, foo$acc_ratio))
     if (good_new_mu & u < foo$acc_ratio) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, ar = foo, u = u, split = split)}
       else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
 
@@ -172,7 +172,6 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     omega_small <- list(K = length(mu) - 1, mu = mu_small, kappa = kappa_small, w = w_small, s = s_small)
     omega_big <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
     bar <- calc_rho(y, omega_small = omega_small, omega_big = omega_big, ind1, ind2, a, b, extras[1], extras[2], extras[3], delta = 1, theta = theta, tau = tau)
-    #print(bar)
     acc_ratio <- 1 / bar$acc_ratio
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
