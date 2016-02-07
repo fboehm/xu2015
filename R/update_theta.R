@@ -26,7 +26,7 @@ update_theta <- function(theta, tau, mu, a1 = 0, b1 = 50, exponent = 0:199){
   # note that lambda_prop is in denominator of e_ratio
   C <- calc_C(mu, theta, tau)
   C_prop <- calc_C(mu, theta_prop, tau)
-  log_det_ratio <- det(C_prop) /  det(C)
+  det_ratio <- det(C_prop) / det(C)
   acc_ratio <- prior_ratio * e_ratio * det_ratio
   u <- runif(n = 1)
   if (u < acc_ratio) {
