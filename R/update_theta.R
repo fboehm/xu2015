@@ -23,9 +23,10 @@ update_theta <- function(theta, tau, mu, a1 = 0, b1 = 50, exponent = 0:199){
   lambda_prop <- sqrt(2 * aa / (aa + bb_prop + cc_prop)) * mult_prop ^ exponent # vector of 20 eigenvalues
   prior_ratio <- dnorm(theta_prop, mean = a1, sd = b1) / dnorm(theta, mean = a1, sd = b1)
   e_ratio <- prod(lambda + 1) / prod(lambda_prop + 1)
+  # note that lambda_prop is in denominator of e_ratio
   C <- calc_C(mu, theta, tau)
   C_prop <- calc_C(mu, theta_prop, tau)
-  det_ratio <- det(C_prop) / det(C)
+  log_det_ratio <- det(C_prop) /  det(C)
   acc_ratio <- prior_ratio * e_ratio * det_ratio
   u <- runif(n = 1)
   if (u < acc_ratio) {

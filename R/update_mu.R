@@ -25,7 +25,6 @@ calc_little_q <- function(mu, tau){
 #' @export
 
 calc_C <- function(mu, theta, tau){# mu is a numeric vector; theta & tau are scalars
-  stopifnot(length(theta) == 1, length(tau) == 1)
   K <- length(mu)
   C <- matrix(NA, nrow = K, ncol = K)
   for (i in 1:K){
