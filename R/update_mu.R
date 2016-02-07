@@ -11,7 +11,6 @@ calc_little_c <- function(mu1, mu2, theta){#mu1 a scalar and mu2 a scalar
 #'
 #' @export
 calc_little_q <- function(mu, tau){
-  #stopifnot(tau > 0, length(tau) == 1)
   return(dnorm(mu, mean = 0, sd = abs(tau)))
 }
 
