@@ -12,7 +12,7 @@ update_theta <- function(theta, tau, mu, a1 = 0, b1 = 50, exponent = 0:199){
   bb <- 1 / (2 * theta ^ 2)
   ## make a theta_prop. What is a good sd to have here?
   ## I have no intuition about what's a reasonable value for theta & tau!
-  theta_prop <- theta + rnorm(n = 1, mean = 0, sd = 0.1)
+  theta_prop <- theta + rnorm(n = 1, mean = 0, sd = 5)
   bb_prop <- 1 / (2 * theta_prop ^ 2)
   cc <- sqrt(aa^2 + 2 * aa * bb)
   cc_prop <- sqrt(aa^2 + 2 * aa * bb_prop)
