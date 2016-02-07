@@ -122,22 +122,25 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     sigma_big <- 1/sqrt(kappa_big)
     # define s_big
     s_big <- define_big_s(s = s, ind1 = ind1, ind2 = ind2, y = y, w_new = w_big, mu_new = mu_big, kappa_new = kappa_big)
-    ##### order parameter vectors by values of mu_big
-    out <- order_parameter_vector(mu = mu_big, sigma = sigma_big, w = w_big, s = s_big)
-    # unpack out
-    s_big <- out$s
-    w_big <- out$w
-    mu_big <- out$mu
-    sigma_big <- out$sigma
     ## Check that the 'new' component of mu is where it should be in the ordered mu
     if (length(mu) + 1 != length(mu_big))stop("lengths of mu and mu_big are wrong")
-    which(!(mu_big %in% mu)) -> indices
-    if (sum(is.na(indices)) > 0) stop("Missing values in vector 'indices'")
-    print(paste("mu: ", mu))
-    print(paste("mu_big:", mu_big))
-    min_index <- min(indices)
-    max_index <- max(indices)
-    good_new_mu <- min_index + 1 == max_index
+    mu_big[c(ind1, ind2)] -> mu_two
+    mu_other <- mu_big[-c(ind1, ind2)]
+    min_mu <- min(mu_two)
+    max_mu <- max(mu_two)
+    if (length(mu_other) == 0) good_new_mu <- TRUE
+    # if mu_big has length 2, then, by definition, there is no
+    # mu between the two components
+    if (length(mu_other) > 0) {
+      tmp1 <- mu_other > min_mu
+      tmp2 <- mu_other < max_mu
+      print(tmp1)
+      print(tmp2)
+      print(tmp1 & tmp2)
+      if (isTRUE(all.equal((tmp1 & tmp2), rep(FALSE, length(mu_other))))){
+        good_new_mu <- TRUE
+        } else {good_new_mu <- FALSE}
+      }
     # in the above, good_new_mu is a logical with value TRUE if
     # the value of the new mu component is viable for acceptance
     # and FALSE otherwise
@@ -147,6 +150,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     foo <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, extras[1], extras[2], extras[3], delta = 1, theta = theta, tau = tau)
     u <- runif(n = 1, min = 0, max = 1)
     # 1. compare u to acceptance ratio & 2. check if good_new_mu is TRUE, then decide to accept or reject
+    print(c(good_new_mu, foo$acc_ratio))
     if (good_new_mu & u < foo$acc_ratio) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, ar = foo, u = u, split = split)}
       else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
 
