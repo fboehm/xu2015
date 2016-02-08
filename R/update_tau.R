@@ -6,7 +6,7 @@
 update_tau <- function(tau, theta, mu, a2 = 0, b2 = 50, exponent = 0:199){
   aa <- 1 / (4 * tau ^ 2)
   bb <- 1 / (2 * theta ^ 2)
-  tau_prop <- tau + rnorm(n = 1, mean = 0, sd = 5)
+  tau_prop <- tau + rnorm(n = 1, mean = 0, sd = 1)
   #tau_prop <- abs(theta + rnorm(n=1, mean=0, sd = 0.5))
   # note use of absolute value above to ensure that tau_prop is positive
   aa_prop <- 1/(4 * tau_prop ^ 2)
@@ -17,7 +17,7 @@ update_tau <- function(tau, theta, mu, a2 = 0, b2 = 50, exponent = 0:199){
   mult_prop <- bb / (aa_prop + bb + cc_prop)
   lambda <- sqrt(2 * aa / (aa + bb + cc)) * mult ^ exponent # vector of eigvenvalues
   lambda_prop <- sqrt(2*aa_prop / (aa_prop + bb + cc_prop)) * mult_prop ^ exponent # vector of 20 eigenvalues
-  prior_ratio <- dnorm(tau_prop, mean = a2, sd = b2) / dnorm(theta, mean = a2, sd = b2)
+  prior_ratio <- dnorm(tau_prop, mean = a2, sd = b2) / dnorm(tau, mean = a2, sd = b2)
   e_ratio <- prod(lambda + 1) / prod(lambda_prop + 1)
   C <- calc_C(mu, theta, tau)
   C_prop <- calc_C(mu, theta, tau_prop)
