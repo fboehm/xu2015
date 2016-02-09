@@ -2,7 +2,7 @@
 % Please edit documentation in R/update_mu.R
 \name{update_mu}
 \alias{update_mu}
-\title{Update $\mu$ in Gibbs sampling}
+\title{Update $mu$ in Gibbs sampling}
 \usage{
 update_mu(y, s, mu, sigma, tau, theta)
 }
@@ -18,6 +18,6 @@ update_mu(y, s, mu, sigma, tau, theta)
 \item{tau}{hyperparameter}
 }
 \description{
-Update $\mu$ in Gibbs sampling
+Update $mu$ in Gibbs sampling
 }
 
