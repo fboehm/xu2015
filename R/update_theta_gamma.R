@@ -22,7 +22,7 @@ update_theta_gamma <- function(theta, tau, mu, shape = 3, scale = 20, exponent =
   mult_prop <- bb_prop / (aa + bb_prop + cc_prop)
   lambda <- sqrt(2 * aa / (aa + bb + cc)) * mult ^ exponent # vector of eigvenvalues
   lambda_prop <- sqrt(2 * aa / (aa + bb_prop + cc_prop)) * mult_prop ^ exponent # vector of 20 eigenvalues
-  prior_ratio <- MCMCpack::dinvgamma(theta_prop, shape = shape, scale = scale) / MCMCpack::dinvgamma(theta, shape = shape, scale = scale)
+  prior_ratio <- MCMCpack::dinvgamma(theta_prop ^ 2, shape = shape, scale = scale) / MCMCpack::dinvgamma(theta ^ 2, shape = shape, scale = scale)
   e_ratio <- prod(lambda + 1) / prod(lambda_prop + 1)
   # note that lambda_prop is in denominator of e_ratio
   C <- calc_C(mu, theta, tau)
