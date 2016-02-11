@@ -144,8 +144,8 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     u <- runif(n = 1, min = 0, max = 1)
     # 1. compare u to acceptance ratio & 2. check if good_new_mu is TRUE, then decide to accept or reject
     #print(c(good_new_mu, foo$acc_ratio))
-    if (good_new_mu & u < foo$acc_ratio) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, ar = foo, u = u, split = split)}
-      else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split)}
+    if (good_new_mu & u < foo$acc_ratio) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, ar = foo, u = u, split = split, good_new_mu = good_new_mu, indic = u < foo$acc_ratio)}
+      else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split, good_new_mu = good_new_mu, indic = u < foo$acc_ratio)}
 
   }else { ## combine
     sampling_vec <- 1:(length(mu) - 1)    # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
