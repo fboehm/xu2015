@@ -122,7 +122,7 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     kappa_big <- define_big_kappa(kappa = kappa, w = w, w_new = w_big, beta = extras[2], r = extras[3], ind1 = ind1, ind2 = ind2)
     sigma_big <- 1/sqrt(kappa_big)
     # define s_big
-    s_big <- define_big_s(s = s, ind1 = ind1, ind2 = ind2, y = y, w_new = w_big, mu_new = mu_big, kappa_new = kappa_big)
+    s_big <- define_big_s(s = s, ind1 = ind1, ind2 = ind2, y = y, w_big = w_big, mu_big = mu_big, kappa_big = kappa_big)
     ## Check that the 'new' component of mu is where it should be in the ordered mu
     if (length(mu) + 1 != length(mu_big))stop("lengths of mu and mu_big are wrong")
     mu_big[c(ind1, ind2)] -> mu_two
