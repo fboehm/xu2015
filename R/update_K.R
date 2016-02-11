@@ -9,7 +9,7 @@ calc_allocation_prob <- function(y, w, # w a scalar
                                  mu, # mu a scalar
                                  kappa # scalar
 ){
-  w * sqrt(kappa) * dnorm(y, mean = mu, sd = 1 / sqrt(kappa))
+  log(w) +  log(sqrt(kappa)) + dnorm(y, mean = mu, sd = 1 / sqrt(kappa), log = TRUE)
 }
 
 
@@ -220,12 +220,15 @@ define_big_kappa <- function(kappa, w, w_new, beta, r, ind1, ind2 = length(w) + 
 
 #' Define a s vector for the model with a longer mu vector
 #' @export
-define_big_s <- function(s, ind1, ind2, y, w_new, mu_new, kappa_new){
+define_big_s <- function(s, ind1, ind2, y, w_big, mu_big, kappa_big){
   for (i in 1:length(s)){
     if (s[i] == ind1){
-      foo_p1 <- calc_allocation_prob(y = y[i], w = w_new[ind1], mu = mu_new[ind1], kappa = kappa_new[ind1])
-      foo_p2 <- calc_allocation_prob(y = y[i], w = w_new[ind2], mu = mu_new[ind2], kappa = kappa_new[ind2])
-      foo_bin <- rbinom(n = 1, size = 1, prob = foo_p1 / (foo_p1 + foo_p2))
+      # calculate **log** probabilities
+      foo_p1 <- calc_allocation_prob(y = y[i], w = w_big[ind1], mu = mu_big[ind1], kappa = kappa_big[ind1])
+      foo_p2 <- calc_allocation_prob(y = y[i], w = w_big[ind2], mu = mu_big[ind2], kappa = kappa_big[ind2])
+      log_denom <- log(exp(foo_p1) + exp(foo_p2))
+      log_prob <- foo_p1 - log_denom
+      foo_bin <- rbinom(n = 1, size = 1, prob = exp(log_prob))
       s[i] <- foo_bin * ind1 + (1 - foo_bin) * ind2
     }
   }
