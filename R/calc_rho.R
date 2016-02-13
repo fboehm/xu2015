@@ -2,11 +2,12 @@
 #'
 #' @param omega_big parameter vector from model with bigger $K$
 #' @param omega_small parameter vector from model with smaller $K$
+#' @param y a data vector
 #' @param theta DPP hyperparameter
 #' @param tau DPP hyperparameter
 #'
 #' @export
-calc_rho <- function(oemga_small, omega_big, theta = theta, tau = tau){
+calc_rho <- function(omega_small, omega_big, y, theta = theta, tau = tau){
   #unpack omega_small
   mu_small <- omega_small$mu
   K_small <- length(mu_small)
