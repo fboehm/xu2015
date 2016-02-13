@@ -69,7 +69,7 @@ test_that("length of output equals length of inputted s",{
   names(s_tab2) <- NULL
   w <- s_tab2 / sample_size
   w_new <- define_big_w(w, 1/2, 2)
-  s_big <- define_big_s(s, 2, 4, y, w_new = rep(0.25, 4), mu_new = c(mu, 5), kappa_new = rep(1,4))
+  s_big <- define_big_s(s, 2, 4, y, w_big = rep(0.25, 4), mu_big = c(mu, 5), kappa_big = rep(1,4))
   ###
   expect_equal(length(s_big), sample_size)
   })
@@ -82,18 +82,17 @@ test_that("exactly 1 group is split into two groups",{
   sd_true <- 0.01
   sigma_true <- rep(sd_true, 2)
   y <- rnorm(n = sample_size, mean = means, sd = sd_true)
-  s <- sample(1:3, size = sample_size, replace = TRUE)
-  mu <- c(-9, 9, 11)
-  sigma <- rep(1, 3)
+  s <- sample(1:1, size = sample_size, replace = TRUE)
+  mu <- c(-9)
+  sigma <- rep(1, 1)
   s_tab <- table(s)
-  s_tab[1:3 ] -> s_tab2
+  s_tab[1:1 ] -> s_tab2
   names(s_tab2) <- NULL
   w <- s_tab2 / sample_size
-  w_new <- define_big_w(w, 1/2, 2)
-  s_big <- define_big_s(s, 2, 4, y, w_new = rep(0.25, 4), mu_new = c(mu, 5), kappa_new = rep(1,4))
+  w_big <- define_big_w(w, 1/2, 2)
+  s_big <- define_big_s(s, 2, 4, y, w_big = w_big, mu_big = c(mu, 5), kappa_big = rep(1,2))
   big_tab<- table(s_big)
   small_tab <- table(s)
   ###
-  expect_equal(sum(big_tab %in% small_tab), length(mu) -1)
+  expect_equal(sum(big_tab %in% small_tab), length(mu) - 1)
 })
-
