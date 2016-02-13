@@ -73,7 +73,8 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     ############
     omega_small <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
     omega_big <- list(K = length(mu) + 1, mu = mu_big, kappa = kappa_big, w = w_big, s = s_big)
-    foo <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, extras[1], extras[2], extras[3], delta = 1, theta = theta, tau = tau)
+    #foo <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, extras[1], extras[2], extras[3], delta = 1, theta = theta, tau = tau)
+    rho <- calc_rho(omega_big, omega_small)
     u <- runif(n = 1, min = 0, max = 1)
     # 1. compare u to acceptance ratio & 2. check if good_new_mu is TRUE, then decide to accept or reject
     #print(c(good_new_mu, foo$acc_ratio))
