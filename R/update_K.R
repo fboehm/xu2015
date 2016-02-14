@@ -39,64 +39,70 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
   split <- as.logical(rbinom(n = 1, size = 1, prob = 1 - q_combine))
   ##########
   if (split){
-    # define the sampling vector
-    sampling_vec <- 1:(length(mu))
-    ind1 <- sample(sampling_vec, size = 1, replace = FALSE)
-    ind2 <- length(mu) + 1
-    ## Yanxun told me to see Richardson & Green 1997
-    # to get the method for
-    # allocation, ie, to assign values to n_new
+    rho <- NaN
+    while(is.nan(rho)){
+      # define the sampling vector
+      sampling_vec <- 1:(length(mu))
+      ind1 <- sample(sampling_vec, size = 1, replace = FALSE)
+      ind2 <- length(mu) + 1
+      ## Yanxun told me to see Richardson & Green 1997
+      # to get the method for
+      # allocation, ie, to assign values to n_new
 
-    # define big w
-    w_big <- define_big_w(w = w, alpha = extras[1], ind1 = ind1, ind2 = ind2)
-    # define big mu
-    mu_big <- define_big_mu(mu = mu, w = w_big, sigma = sigma, ind1 = ind1, ind2 = ind2, r = extras[3])
-    # define sigma_big... actually, kappa_big
-    kappa_big <- define_big_kappa(kappa = kappa, w = w, w_new = w_big, beta = extras[2], r = extras[3], ind1 = ind1, ind2 = ind2)
-    sigma_big <- 1/sqrt(kappa_big)
-    # define s_big
-    s_big <- define_big_s(s = s, ind1 = ind1, ind2 = ind2, y = y, w_big = w_big, mu_big = mu_big, kappa_big = kappa_big)
-    ## Check that the 'new' component of mu is where it should be in the ordered mu
-    if (length(mu) + 1 != length(mu_big))stop("lengths of mu and mu_big are wrong")
-    mu_big[c(ind1, ind2)] -> mu_two
-    mu_other <- mu_big[-c(ind1, ind2)]
-    min_mu <- min(mu_two)
-    max_mu <- max(mu_two)
-    if (length(mu_other) == 0) good_new_mu <- TRUE
-    # if mu_big has length 2, then, by definition, there is no
-    # mu between the two components
-    #####################################
-    good_new_mu <- ! (sum(mu_other < max_mu & mu_other > min_mu) > 0)
-    # in the above, good_new_mu is a logical with value TRUE if
-    # the value of the new mu component is viable for acceptance
-    # and FALSE otherwise
-    ############
-    omega_small <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
-    omega_big <- list(K = length(mu) + 1, mu = mu_big, kappa = kappa_big, w = w_big, s = s_big)
-    rho <- calc_rho(omega_big = omega_big, omega_small = omega_small, y = y, tau = tau, theta = theta)
+      # define big w
+      w_big <- define_big_w(w = w, alpha = extras[1], ind1 = ind1, ind2 = ind2)
+      # define big mu
+      mu_big <- define_big_mu(mu = mu, w = w_big, sigma = sigma, ind1 = ind1, ind2 = ind2, r = extras[3])
+      # define sigma_big... actually, kappa_big
+      kappa_big <- define_big_kappa(kappa = kappa, w = w, w_new = w_big, beta = extras[2], r = extras[3], ind1 = ind1, ind2 = ind2)
+      sigma_big <- 1/sqrt(kappa_big)
+      # define s_big
+      s_big <- define_big_s(s = s, ind1 = ind1, ind2 = ind2, y = y, w_big = w_big, mu_big = mu_big, kappa_big = kappa_big)
+      ## Check that the 'new' component of mu is where it should be in the ordered mu
+      if (length(mu) + 1 != length(mu_big))stop("lengths of mu and mu_big are wrong")
+      mu_big[c(ind1, ind2)] -> mu_two
+      mu_other <- mu_big[-c(ind1, ind2)]
+      min_mu <- min(mu_two)
+      max_mu <- max(mu_two)
+      if (length(mu_other) == 0) good_new_mu <- TRUE
+      # if mu_big has length 2, then, by definition, there is no
+      # mu between the two components
+      #####################################
+      good_new_mu <- ! (sum(mu_other < max_mu & mu_other > min_mu) > 0)
+      # in the above, good_new_mu is a logical with value TRUE if
+      # the value of the new mu component is viable for acceptance
+      # and FALSE otherwise
+      ############
+      omega_small <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
+      omega_big <- list(K = length(mu) + 1, mu = mu_big, kappa = kappa_big, w = w_big, s = s_big)
+      rho <- calc_rho(omega_big = omega_big, omega_small = omega_small, y = y, tau = tau, theta = theta)
+    }
     u <- runif(n = 1, min = 0, max = 1)
     # 1. compare u to acceptance ratio & 2. check if good_new_mu is TRUE, then decide to accept or reject
     if (good_new_mu & u < rho) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, rho = rho, u = u, split = split, good_new_mu = good_new_mu)}
       else {out <- list(w = w, mu = mu, kappa = kappa, s = s, rho = rho, u = u, split = split, good_new_mu = good_new_mu)}
 
   }else { ## combine
-    sampling_vec <- 1:(length(mu) - 1)    # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
-    index <- sample(sampling_vec, size=1, replace=FALSE)
-    ind1 <- index
-    ind2 <- index + 1 # force the second index to be next to the first
-    # define small w
-    w_small <- define_small_w(w, ind1, ind2)
-    # define small mu
-    mu_small <- define_small_mu(mu = mu, w = w, w_new = w_small, ind1 = ind1, ind2 = ind2)
-    # define small kappa
-    kappa_small <- define_small_kappa(kappa, w, w_new = w_small, ind1, ind2, mu)
-    # define small s
-    s_small <- define_small_s(s, mu, ind1, ind2)
-    #################
-    # calculate acceptance ratio
-    omega_small <- list(K = length(mu) - 1, mu = mu_small, kappa = kappa_small, w = w_small, s = s_small)
-    omega_big <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
-    rho <- calc_rho(y = y, omega_small = omega_small, omega_big = omega_big, tau = tau, theta = theta)
+    rho <- NaN
+    while(is.nan(rho)){
+      sampling_vec <- 1:(length(mu) - 1)    # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
+      index <- sample(sampling_vec, size=1, replace=FALSE)
+      ind1 <- index
+      ind2 <- index + 1 # force the second index to be next to the first
+      # define small w
+      w_small <- define_small_w(w, ind1, ind2)
+      # define small mu
+      mu_small <- define_small_mu(mu = mu, w = w, w_new = w_small, ind1 = ind1, ind2 = ind2)
+      # define small kappa
+      kappa_small <- define_small_kappa(kappa, w, w_new = w_small, ind1, ind2, mu)
+      # define small s
+      s_small <- define_small_s(s, mu, ind1, ind2)
+      #################
+      # calculate acceptance ratio
+      omega_small <- list(K = length(mu) - 1, mu = mu_small, kappa = kappa_small, w = w_small, s = s_small)
+      omega_big <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
+      rho <- calc_rho(y = y, omega_small = omega_small, omega_big = omega_big, tau = tau, theta = theta)
+    }
     acc_ratio <- 1 / rho
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
