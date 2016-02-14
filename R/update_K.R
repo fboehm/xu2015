@@ -73,13 +73,12 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     ############
     omega_small <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
     omega_big <- list(K = length(mu) + 1, mu = mu_big, kappa = kappa_big, w = w_big, s = s_big)
-    #foo <- calc_rho(y, omega_small, omega_big, ind1, ind2, a, b, extras[1], extras[2], extras[3], delta = 1, theta = theta, tau = tau)
-    rho <- calc_rho(omega_big, omega_small)
+    rho <- calc_rho(omega_big = omega_big, omega_small = omega_small, y = y, tau = tau, theta = theta)
     u <- runif(n = 1, min = 0, max = 1)
     # 1. compare u to acceptance ratio & 2. check if good_new_mu is TRUE, then decide to accept or reject
     #print(c(good_new_mu, foo$acc_ratio))
-    if (good_new_mu & u < foo$acc_ratio) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, ar = foo, u = u, split = split, good_new_mu = good_new_mu, indic = u < foo$acc_ratio)}
-      else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = foo, u = u, split = split, good_new_mu = good_new_mu, indic = u < foo$acc_ratio)}
+    if (good_new_mu & u < rho) {out <- list(w = w_big, mu = mu_big, kappa = kappa_big, s = s_big, rho = rho, u = u, split = split, good_new_mu = good_new_mu, indic = u < foo$acc_ratio)}
+      else {out <- list(w = w, mu = mu, kappa = kappa, s = s, rho = rho, u = u, split = split, good_new_mu = good_new_mu, indic = u < foo$acc_ratio)}
 
   }else { ## combine
     sampling_vec <- 1:(length(mu) - 1)    # we introduce sampling_vec because there's a chance that none of the y's are assigned to some of our clusters.
@@ -98,11 +97,11 @@ update_K <- function(y, mu, w, sigma, s, tau, theta, delta){
     # calculate acceptance ratio
     omega_small <- list(K = length(mu) - 1, mu = mu_small, kappa = kappa_small, w = w_small, s = s_small)
     omega_big <- list(K = length(mu), mu = mu, kappa = kappa, w = w, s = s)
-    rho <- calc_rho(y = y, omega_small = omega_small, omega_big = omega_big)
+    rho <- calc_rho(y = y, omega_small = omega_small, omega_big = omega_big, tau = tau, theta = theta)
     acc_ratio <- 1 / rho
     u <- runif(n = 1, min = 0, max = 1)
     # compare u to acceptance ratio & decide to accept or reject
-    if (u < acc_ratio) {out <- list(w = w_small, mu = mu_small, kappa = kappa_small, s=s_small, ar = bar, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, ar = bar, u = u, split = split)}
+    if (u < acc_ratio) {out <- list(w = w_small, mu = mu_small, kappa = kappa_small, s=s_small, rho = rho, u = u, split = split)} else {out <- list(w = w, mu = mu, kappa = kappa, s = s, rho = rho, u = u, split = split)}
   }
   return(out)
 }
@@ -162,7 +161,6 @@ define_big_s <- function(s, ind1, ind2, y, w_big, mu_big, kappa_big){
       # calculate log denominator
       log_denom <- log(exp(log_p1) + exp(log_p2))
       log_prob <- log_p1 - log_denom
-      print(c(log_denom, log_prob))
       foo_bin <- rbinom(n = 1, size = 1, prob = exp(log_prob))
       s[i] <- foo_bin * ind1 + (1 - foo_bin) * ind2
     }
