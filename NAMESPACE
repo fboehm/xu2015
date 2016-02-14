@@ -2,9 +2,11 @@
 
 export(calc_C)
 export(calc_allocation_prob)
+export(calc_detJ)
 export(calc_little_c)
 export(calc_little_q)
 export(calc_rho)
+export(calc_rho_old)
 export(define_big_kappa)
 export(define_big_mu)
 export(define_big_s)

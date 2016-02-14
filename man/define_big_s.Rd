@@ -4,7 +4,7 @@
 \alias{define_big_s}
 \title{Define a s vector for the model with a longer mu vector}
 \usage{
-define_big_s(s, ind1, ind2, y, w_new, mu_new, kappa_new)
+define_big_s(s, ind1, ind2, y, w_big, mu_big, kappa_big)
 }
 \description{
 Define a s vector for the model with a longer mu vector
